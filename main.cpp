@@ -28,11 +28,13 @@ bool sizeDirection = false;
 static const char* vShader = "						\n\
 #version 330										\n\
 uniform mat4 model;									\n\
+out vec4 lerpColor;									\n\
 layout(location = 0) in vec3 pos;					\n\
 													\n\
 void main()											\n\
 {													\n\
-	gl_Position = model * vec4(pos.x, pos.y, pos.z, 1.0);	\n\
+	gl_Position = model * vec4(pos.x, pos.y, pos.z, 1.0);\n\
+	lerpColor = vec4(clamp(pos,0.0,1.0), 1.0f);		\n\
 													\n\
 }";
 
@@ -41,10 +43,11 @@ static const char* fShader = "						\n\
 #version 330										\n\
 													\n\
 out vec4 color;										\n\
+in vec4 lerpColor;									\n\
 													\n\
 void main()											\n\
 {													\n\
-	color = vec4(1.0, 1.0, 0.0, 1.0);				\n\
+	color = lerpColor;								\n\
 }";
 
 void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType) {
