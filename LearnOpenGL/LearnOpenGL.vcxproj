@@ -129,13 +129,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>${SolutionDir}/../../externals/GLFW_32/include;${SolutionDir}/../../externals/GLEW/include;${SolutionDir}/../../externals/GLM_32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>${SolutionDir}../../externals/GLFW_32/lib-vc2019;${SolutionDir}../../externals/GLEW/lib/Release/Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.ib;glfw3.lib;glew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)../../externals/GLFW_32/lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,15 +146,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>${SolutionDir}/../../externals/GLFW_32/include;${SolutionDir}/../../externals/GLEW/include;${SolutionDir}/../../externals/GLM_32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>${SolutionDir}../../externals/GLFW_32/lib-vc2019;${SolutionDir}../../externals/GLEW/lib/Release/Win32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.ib;glfw3.lib;glew32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)../../externals/GLFW_32/lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
