@@ -2,6 +2,7 @@
 *.d
 
 externals/*
+LearnOpenGL/Debug
 
 # Compiled Object files
 *.slo
