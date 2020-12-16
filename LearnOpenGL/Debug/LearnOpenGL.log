@@ -1,2 +1,5 @@
-﻿  main.cpp
+﻿  glad.c
+  Mesh.cpp
+  main.cpp
+  Generating Code...
   LearnOpenGL.vcxproj -> G:\Documents\GitHub\Udemy\repos\LearnOpenGL\Debug\LearnOpenGL.exe

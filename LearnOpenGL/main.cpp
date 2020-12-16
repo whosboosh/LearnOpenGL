@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <iostream>
-#include <GL\glew.h>
+#include <glad/glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -161,14 +161,10 @@ int main()
 	// Set context for GLEW to use
 	glfwMakeContextCurrent(mainWindow);
 
-	// Allow modern extension features
-	glewExperimental = GL_TRUE;
-
-	if (glewInit() != GLEW_OK) {
-		printf("GLEW initislisation failed");
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
 	}
 
 	glEnable(GL_DEPTH_TEST);
