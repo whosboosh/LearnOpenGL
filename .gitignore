@@ -3,6 +3,7 @@
 
 externals/*
 LearnOpenGL/Debug
+.vs
 
 # Compiled Object files
 *.slo

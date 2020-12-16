@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-#include <GL\glew.h>
+#include <glad\glad.h>
 
 class Shader
 {
@@ -31,4 +31,3 @@ private:
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
 };
-

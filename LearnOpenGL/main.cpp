@@ -7,13 +7,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include "Mesh.h"
+#include "Shader.h"
+#include "main.h"
+#include "Window.h"
 
-// Window dimensions
-const GLint WIDTH = 800, HEIGHT = 600;
-
+Window mainWindow;
 std::vector<Mesh*> meshList;
+std::vector<Shader> shaderList;
 
-GLuint shader, uniformModel, uniformProjection;
 const float toRadians = 3.14159265f / 180.0f;
 
 bool direction = true;
@@ -28,88 +29,11 @@ float maxSize = 0.8f;
 float minSize = 0.1f;
 bool sizeDirection = false;
 
-// Vertex Shader
-static const char* vShader = "						\n\
-#version 330										\n\
-uniform mat4 model;									\n\
-uniform mat4 projection;							\n\
-out vec4 lerpColor;									\n\
-layout(location = 0) in vec3 pos;					\n\
-													\n\
-void main()											\n\
-{													\n\
-	gl_Position = projection * model * vec4(pos.x, pos.y, pos.z, 1.0);\n\
-	lerpColor = vec4(clamp(pos,0.0,1.0), 1.0f);		\n\
-													\n\
-}";
+// Shaders
+static const char* vShader = "Shaders/shader.vert";
+static const char* fShader = "Shaders/shader.frag";
 
-// Frag shader
-static const char* fShader = "						\n\
-#version 330										\n\
-													\n\
-out vec4 color;										\n\
-in vec4 lerpColor;									\n\
-													\n\
-void main()											\n\
-{													\n\
-	color = lerpColor;								\n\
-}";
-
-void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType) {
-	GLuint theShader = glCreateShader(shaderType);
-
-	const GLchar* theCode[1];
-	theCode[0] = shaderCode;
-
-	GLint codeLength[1];
-	codeLength[0] = strlen(shaderCode);
-
-	glShaderSource(theShader, 1, theCode, codeLength);
-	glCompileShader(theShader);
-
-	GLint result = 0;
-	GLchar eLog[1024] = { 0 };
-
-	glGetShaderiv(theShader, GL_COMPILE_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(shader, sizeof(eLog), NULL, eLog);
-		printf("Error compiling the %d shader program %s\n", shaderType, eLog);
-		return;
-	}
-	glAttachShader(theProgram, theShader);
-}
-
-void CompileShaders() {
-	shader = glCreateProgram();
-	if (!shader) {
-		printf("Error creating shader program!");
-		return;
-	}
-
-	AddShader(shader, vShader, GL_VERTEX_SHADER);
-	AddShader(shader, fShader, GL_FRAGMENT_SHADER);
-
-	GLint result = 0;
-	GLchar eLog[1024] = { 0 };
-
-	glLinkProgram(shader);
-	glGetProgramiv(shader, GL_LINK_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(shader, sizeof(eLog), NULL, eLog);
-		printf("Error linking program %s\n", eLog);
-		return;
-	}
-
-	glValidateProgram(shader);
-	glGetProgramiv(shader, GL_VALIDATE_STATUS, &result);
-	if (!result) {
-		glGetProgramInfoLog(shader, sizeof(eLog), NULL, eLog);
-		printf("Failed to validate shader %s\n", eLog);
-	}
-
-}
-
-void CreateTriangle() {
+void CreateObjects() {
 	GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f,
 		0.0f, -1.0f, 1.0f,
@@ -128,59 +52,30 @@ void CreateTriangle() {
 	obj1->CreateMesh(vertices, indicies, (sizeof(vertices) / sizeof(*vertices)), 12);
 	meshList.push_back(obj1);
 }
+
+void CreateShaders()
+{
+	Shader* shader1 = new Shader();
+
+	shader1->CreateFromFiles(vShader, fShader);
+	shaderList.push_back(*shader1);
+}
+
 int main()
 {
-	// Initalise GLFW 
-	if (!glfwInit())
-	{
-		printf("GLFW initialisation failed");
-		glfwTerminate();
-		return 1;
-	}
+	mainWindow = Window(800, 600);
+	mainWindow.Initialise();
 
-	// Setup GLFW window properties
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Use core mode (not immediate)
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	// Allow forward compatibility
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-	GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Test Window", NULL, NULL);
-	if (!mainWindow)
-	{
-		printf("GLFW window creation failed!");
-		glfwTerminate();
-		return 1;
-	}
-
-	// Get buffer size information
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-
-	// Set context for GLEW to use
-	glfwMakeContextCurrent(mainWindow);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-	glEnable(GL_DEPTH_TEST);
-
-	// Setup viewport size
-	glViewport(0, 0, bufferWidth, bufferHeight);
-
-	CreateTriangle();
-	CompileShaders();
+	CreateObjects();
+	CreateShaders();
 
 	// Uniform
-	uniformModel = glGetUniformLocation(shader, "model");
-	uniformProjection = glGetUniformLocation(shader, "projection");
+	GLuint uniformProjection = 0, uniformModel = 0;
+	uniformProjection = shaderList[0].GetProjectionLocation();
+	uniformModel = shaderList[0].GetModelLocation();
 
 	// Loop until window closed
-	while (!glfwWindowShouldClose(mainWindow)) {
+	while (!mainWindow.getShouldClose()) {
 		// Business logic for application
 		glfwPollEvents();
 
@@ -188,8 +83,7 @@ int main()
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(shader);
-
+		shaderList[0].UseShader();
 
 		if (direction)
 		{
@@ -226,14 +120,14 @@ int main()
 
 		// Projection matrix
 		glm::mat4 projection(1.0f); // Identity matrix
-		projection = glm::perspective(70.0f, (GLfloat)bufferWidth / bufferHeight, 0.1f, 100.0f);
+		projection = glm::perspective(70.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
 		meshList[0]->RenderMesh();
 
 		glUseProgram(0);
 
-		glfwSwapBuffers(mainWindow);
+		mainWindow.swapBuffers();
 	}
 
 	return 0;

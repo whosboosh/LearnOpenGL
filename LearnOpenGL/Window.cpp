@@ -1,4 +1,5 @@
 #include "Window.h"
+#include <iostream>
 
 Window::Window()
 {
@@ -45,16 +46,10 @@ int Window::Initialise()
 	// Set the current context
 	glfwMakeContextCurrent(mainWindow);
 
-	// Allow modern extension access
-	glewExperimental = GL_TRUE;
-
-	GLenum error = glewInit();
-	if (error != GLEW_OK)
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		printf("Error: %s", glewGetErrorString(error));
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -69,3 +64,4 @@ Window::~Window()
 	glfwDestroyWindow(mainWindow);
 	glfwTerminate();
 }
+
