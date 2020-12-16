@@ -3,7 +3,8 @@
 
 externals/*
 LearnOpenGL/Debug
-.vs
+.vs/*
+.vs/LearnOpenGL/v16/Browse.VC.db
 
 # Compiled Object files
 *.slo
