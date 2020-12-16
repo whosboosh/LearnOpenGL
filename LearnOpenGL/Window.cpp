@@ -56,12 +56,46 @@ int Window::Initialise()
 
 	// Create Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
+
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(mainWindow, mouse_callback);
+	glfwSetKeyCallback(mainWindow, key_callback);
+	glfwSetWindowUserPointer(mainWindow, this);
 }
+
 
 
 Window::~Window()
 {
 	glfwDestroyWindow(mainWindow);
 	glfwTerminate();
+}
+
+void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_W && action == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (key == GLFW_KEY_A && action == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	if (theWindow->mouseFirstMoved) 
+	{
+		theWindow->lastX = xpos;
+		theWindow->lastY = ypos;
+		theWindow->mouseFirstMoved = false;
+	}
+	theWindow->xChange = xpos - theWindow->lastX;
+	theWindow->yChange = theWindow->lastY - ypos;
+
+	theWindow->lastX = xpos;
+	theWindow->lastY = ypos;
 }
 
