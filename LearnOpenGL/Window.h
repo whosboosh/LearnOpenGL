@@ -4,6 +4,7 @@
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
+#include <glm/glm.hpp>
 
 class Window
 {
@@ -21,7 +22,9 @@ public:
 
 	void swapBuffers() { glfwSwapBuffers(mainWindow); }
 
-
+	bool* getKeys() { return keys; }
+	GLfloat getXChange();
+	GLfloat getYChange();
 
 	~Window();
 
@@ -31,12 +34,14 @@ private:
 	GLint width, height;
 	GLint bufferWidth, bufferHeight;
 
+	bool keys[1024] = { 0 };
+
 	GLfloat lastX;
 	GLfloat lastY;
 	GLfloat xChange;
 	GLfloat yChange;
-	bool mouseFirstMoved = true;
 
+	bool mouseFirstMoved = true;
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

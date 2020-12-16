@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <iostream>
+#include <glm/glm.hpp>
 
 Window::Window()
 {
@@ -58,12 +59,24 @@ int Window::Initialise()
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetWindowUserPointer(mainWindow, this);
 	glfwSetCursorPosCallback(mainWindow, mouse_callback);
 	glfwSetKeyCallback(mainWindow, key_callback);
-	glfwSetWindowUserPointer(mainWindow, this);
 }
 
+GLfloat Window::getXChange()
+{
+	GLfloat change = xChange;
+	xChange = 0.0f;
+	return change;
+}
 
+GLfloat Window::getYChange()
+{
+	GLfloat change = yChange;
+	yChange = 0.0f;
+	return change;
+}
 
 Window::~Window()
 {
@@ -73,14 +86,24 @@ Window::~Window()
 
 void Window::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_W && action == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
-	if (key == GLFW_KEY_S && action == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
-	if (key == GLFW_KEY_A && action == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	if (key >= 0 && key < 1024)
+	{
+		if (action == GLFW_PRESS)
+		{
+			theWindow->keys[key] = true;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			theWindow->keys[key] = false;
+		}
+	}
 }
 
 void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos)

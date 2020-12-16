@@ -10,19 +10,24 @@
 #include "Shader.h"
 #include "main.h"
 #include "Window.h"
+#include "Camera.h"
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+Camera camera;
 
 const float toRadians = 3.14159265f / 180.0f;
 
 bool direction = true;
 float triOffset = 0.0f;
 float triMaxOffset = 0.7f;
-float triIncrement = 0.005f;
+float triIncrement = 0.5f;
 
 float curAngle = 0.0f;
+
+float deltaTime = 0.0f;
+float lastTime = 0.0f;
 
 float curSize = 0.4f;
 float maxSize = 0.8f;
@@ -66,16 +71,24 @@ int main()
 	mainWindow = Window(800, 600);
 	mainWindow.Initialise();
 
+	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -10.0f, 5.0f, 0.01f);
+
 	CreateObjects();
 	CreateShaders();
 
 	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView;
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
+	uniformView = shaderList[0].GetViewLocation();
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
+		// Delta time for synchronising events
+		float now = glfwGetTime();
+		deltaTime = now - lastTime;
+		lastTime = now;
+
 		// Business logic for application
 		glfwPollEvents();
 
@@ -83,45 +96,39 @@ int main()
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		camera.keyControl(mainWindow.getKeys(), deltaTime);
+		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+
 		shaderList[0].UseShader();
 
 		if (direction)
 		{
-			triOffset += triIncrement;
+			triOffset += triIncrement * deltaTime;
 		}
 		else {
-			triOffset -= triIncrement;
+			triOffset -= triIncrement * deltaTime;
 		}
 		if (abs(triOffset) >= triMaxOffset) {
 			direction = !direction;
 		}
-
-		curAngle += 0.3f;
-		if (curAngle >= 360) {
-			curAngle -= 360;
-		}
-
-		if (sizeDirection) {
-			curSize += 0.001f;
-		}
-		else {
-			curSize -= 0.001f;
-		}
-		if (curSize >= maxSize || curSize <= minSize) {
-			sizeDirection = !sizeDirection;
-		}
+		curAngle += 30.0f * deltaTime;
+		if (curAngle >= 360.0f) curAngle = 0.0f;
 
 		// Model matrix
 		glm::mat4 model(1.0f); // Identity matrix
 		model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f)); // Apply a translation matrix to the model matrix
-		model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+		model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		// Projection matrix
 		glm::mat4 projection(1.0f); // Identity matrix
 		projection = glm::perspective(70.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+		// Camera Movement
+		glm::mat4 identity(1.0f);
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
 		meshList[0]->RenderMesh();
 
