@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Window.h"
 
 Camera::Camera()
 {
@@ -48,16 +49,14 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 
 	yaw += xChange;
 	pitch += yChange;
+	if (pitch > 89.0f) pitch = 89.0f;
+	if (pitch < -89.0f) pitch = -89.0f;
 
-	if (pitch > 89.0f)
-	{
-		pitch = 89.0f;
-	}
-	if (pitch < -89.0f)
-	{
-		pitch = -89.0f;
-	}
-	update();
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front = glm::normalize(direction);
 }
 
 glm::mat4 Camera::calculateViewMatrix()
@@ -67,10 +66,11 @@ glm::mat4 Camera::calculateViewMatrix()
 
 void Camera::update()
 {
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front = glm::normalize(front);
+	glm::vec3 direction(1.0f);
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front = glm::normalize(direction);
 
 	right = glm::normalize(glm::cross(front, worldUp));
 	up = glm::normalize(glm::cross(right, front));

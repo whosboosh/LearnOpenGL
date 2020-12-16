@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdio.h"
+#include <stdio.h>
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
@@ -38,8 +38,8 @@ private:
 
 	GLfloat lastX;
 	GLfloat lastY;
-	GLfloat xChange;
-	GLfloat yChange;
+	GLfloat xChange = 0.0f;
+	GLfloat yChange = 0.0f;
 
 	bool mouseFirstMoved = true;
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
