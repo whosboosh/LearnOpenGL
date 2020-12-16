@@ -8,7 +8,7 @@ Camera::Camera()
 Camera::Camera(glm::vec3 startPos, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed)
 {
 	position = startPos;
-	up = startUp;
+	worldUp = startUp;
 	yaw = startYaw;
 	pitch = startPitch;
 	moveSpeed = startMoveSpeed;
@@ -52,11 +52,7 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 	if (pitch > 89.0f) pitch = 89.0f;
 	if (pitch < -89.0f) pitch = -89.0f;
 
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front = glm::normalize(direction);
+	update();
 }
 
 glm::mat4 Camera::calculateViewMatrix()

@@ -77,7 +77,7 @@ int main()
 	CreateShaders();
 
 	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
