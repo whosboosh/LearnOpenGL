@@ -5,11 +5,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
+#include "Mesh.h"
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
 
-GLuint VAO, VBO, IBO, shader, uniformModel;
+std::vector<Mesh*> meshList;
+
+GLuint shader, uniformModel, uniformProjection;
 const float toRadians = 3.14159265f / 180.0f;
 
 bool direction = true;
@@ -28,12 +32,13 @@ bool sizeDirection = false;
 static const char* vShader = "						\n\
 #version 330										\n\
 uniform mat4 model;									\n\
+uniform mat4 projection;							\n\
 out vec4 lerpColor;									\n\
 layout(location = 0) in vec3 pos;					\n\
 													\n\
 void main()											\n\
 {													\n\
-	gl_Position = model * vec4(pos.x, pos.y, pos.z, 1.0);\n\
+	gl_Position = projection * model * vec4(pos.x, pos.y, pos.z, 1.0);\n\
 	lerpColor = vec4(clamp(pos,0.0,1.0), 1.0f);		\n\
 													\n\
 }";
@@ -87,7 +92,6 @@ void CompileShaders() {
 	GLint result = 0;
 	GLchar eLog[1024] = { 0 };
 
-
 	glLinkProgram(shader);
 	glGetProgramiv(shader, GL_LINK_STATUS, &result);
 	if (!result) {
@@ -106,7 +110,7 @@ void CompileShaders() {
 }
 
 void CreateTriangle() {
-	GLfloat verticies[] = {
+	GLfloat vertices[] = {
 		-1.0f, -1.0f, 0.0f,
 		0.0f, -1.0f, 1.0f,
 		1.0f, -1.0f, 0.0f,
@@ -120,27 +124,13 @@ void CreateTriangle() {
 		0,1,2
 	};
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	glGenBuffers(1, &IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticies), verticies, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
+	Mesh* obj1 = new Mesh();
+	obj1->CreateMesh(vertices, indicies, (sizeof(vertices) / sizeof(*vertices)), 12);
+	meshList.push_back(obj1);
 }
 int main()
 {
-	// Initalise GLFW
+	// Initalise GLFW 
 	if (!glfwInit())
 	{
 		printf("GLFW initialisation failed");
@@ -191,6 +181,7 @@ int main()
 
 	// Uniform
 	uniformModel = glGetUniformLocation(shader, "model");
+	uniformProjection = glGetUniformLocation(shader, "projection");
 
 	// Loop until window closed
 	while (!glfwWindowShouldClose(mainWindow)) {
@@ -215,8 +206,8 @@ int main()
 			direction = !direction;
 		}
 
-		curAngle += 0.1f;
-		if(curAngle >= 360) {
+		curAngle += 0.3f;
+		if (curAngle >= 360) {
 			curAngle -= 360;
 		}
 
@@ -230,19 +221,19 @@ int main()
 			sizeDirection = !sizeDirection;
 		}
 
+		// Model matrix
 		glm::mat4 model(1.0f); // Identity matrix
-		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f)); // Apply a translation matrix to the model matrix
+		model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f)); // Apply a translation matrix to the model matrix
 		model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
-
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		// Projection matrix
+		glm::mat4 projection(1.0f); // Identity matrix
+		projection = glm::perspective(70.0f, (GLfloat)bufferWidth / bufferHeight, 0.1f, 100.0f);
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+		meshList[0]->RenderMesh();
 
 		glUseProgram(0);
 
