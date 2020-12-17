@@ -17,6 +17,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Light.h"
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -24,6 +25,8 @@ std::vector<Shader> shaderList;
 Camera camera;
 
 Texture woodTexture;
+
+Light mainLight;
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -84,14 +87,18 @@ int main()
 	woodTexture = Texture("Textures/wood.png");
 	woodTexture.LoadTexture();
 
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.65f);
+
 	CreateObjects();
 	CreateShaders();
 
 	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0;
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
+	uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
+	uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
 
 	glm::mat4 projection = glm::perspective(70.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
@@ -126,6 +133,9 @@ int main()
 		}
 		curAngle += 30.0f * deltaTime;
 		if (curAngle >= 360.0f) curAngle = 0.0f;
+
+		// Use light source
+		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
 
 		glm::mat4 model(1.0f); // Identity matrix
 		model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f)); // Apply a translation matrix to the model matrix
