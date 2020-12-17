@@ -1,28 +1,36 @@
-#include <stdio.h>
-#include <iostream>
-#include <glad/glad.h>
+#define STB_IMAGE_IMPLEMENTATION
+
+
+#include <GLAD\glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
+#include <stdio.h>
+#include <iostream>
+
 #include "Mesh.h"
 #include "Shader.h"
 #include "main.h"
 #include "Window.h"
 #include "Camera.h"
+#include "Texture.h"
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 Camera camera;
 
+Texture woodTexture;
+
 const float toRadians = 3.14159265f / 180.0f;
 
 bool direction = true;
 float triOffset = 0.0f;
 float triMaxOffset = 0.7f;
-float triIncrement = 0.5f;
+float triIncrement = 1.0f;
 
 float curAngle = 0.0f;
 
@@ -40,10 +48,10 @@ static const char* fShader = "Shaders/shader.frag";
 
 void CreateObjects() {
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		0.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f
 	};
 
 	unsigned int indicies[] = {
@@ -72,6 +80,9 @@ int main()
 	mainWindow.Initialise();
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -10.0f, 5.0f, 0.05f);
+
+	woodTexture = Texture("Textures/wood.png");
+	woodTexture.LoadTexture();
 
 	CreateObjects();
 	CreateShaders();
@@ -124,6 +135,8 @@ int main()
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
+		// Textures
+		woodTexture.UseTexture();
 		meshList[0]->RenderMesh();
 
 		glUseProgram(0);
