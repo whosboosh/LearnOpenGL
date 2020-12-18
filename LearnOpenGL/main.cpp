@@ -49,23 +49,57 @@ bool sizeDirection = false;
 static const char* vShader = "Shaders/shader.vert";
 static const char* fShader = "Shaders/shader.frag";
 
+void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat *vertices,
+	unsigned int verticeCount, unsigned int vLength, unsigned int normalOffset)
+{
+	// For each face in a mesh, ln0, ln1, ln2 correspond to each vertex of that face.
+	// We want to create two new vector 
+	for (size_t i = 0; i <= indiceCount; i += 3) 
+	{
+		unsigned int ln0 = indices[i] * vLength;
+		unsigned int ln1 = indices[i + 1] * vLength;
+		unsigned int ln2 = indices[i + 2] * vLength;
+
+		glm::vec3 v1(vertices[ln1] - vertices[ln0], vertices[ln1 + 1] - vertices[ln0 + 1], vertices[ln1 + 2] - vertices[ln0 + 2]);
+		glm::vec3 v2(vertices[ln2] - vertices[ln0], vertices[ln2 + 1] - vertices[ln0 + 1], vertices[ln2 + 2] - vertices[ln0 + 2]);
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
+		vertices[ln0] += normal.x; vertices[ln0  + 1] += normal.y; vertices[ln0 + 2] += normal.z;
+		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
+		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
+	}
+	for (size_t i = 0; i < verticeCount / vLength; i++)
+	{
+		unsigned int nOffset = i * vLength + normalOffset;
+		glm::vec3 vec(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
+		vec = glm::normalize(vec);
+		vertices[nOffset] = vec.x; vertices[nOffset + 1] = vec.y; vertices[nOffset + 2] = vec.z;
+	}
+}
+
+
 void CreateObjects() {
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 1.0f, 0.5f, 0.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.5f, 1.0f
+	//	x	   y      z     u     v     nx    ny    nz
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
 	};
 
-	unsigned int indicies[] = {
+	unsigned int indices[] = {
 		0,3,1,
 		1,2,3,
 		2,3,0,
 		0,1,2
 	};
 
+	calcAverageNormals(indices, 12, vertices, 32, 8, 5);
+
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indicies, (sizeof(vertices) / sizeof(*vertices)), 12);
+	obj1->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
 	meshList.push_back(obj1);
 }
 
@@ -87,18 +121,20 @@ int main()
 	woodTexture = Texture("Textures/wood.png");
 	woodTexture.LoadTexture();
 
-	mainLight = Light(1.0f, 1.0f, 1.0f, 0.65f);
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.65f, 2.0f, -1.0f, -2.0f, 1.0f);
 
 	CreateObjects();
 	CreateShaders();
 
 	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0, uniformDirection = 0, uniformDiffuseIntensity = 0;
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
 	uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
 	uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
+	uniformDirection = shaderList[0].GetDirectionLocation();
+	uniformDiffuseIntensity = shaderList[0].GetDiffuseIntensityLocation();
 
 	glm::mat4 projection = glm::perspective(70.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
@@ -135,7 +171,7 @@ int main()
 		if (curAngle >= 360.0f) curAngle = 0.0f;
 
 		// Use light source
-		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
+		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
 
 		glm::mat4 model(1.0f); // Identity matrix
 		model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f)); // Apply a translation matrix to the model matrix
