@@ -33,7 +33,7 @@ const float toRadians = 3.14159265f / 180.0f;
 bool direction = true;
 float triOffset = 0.0f;
 float triMaxOffset = 0.7f;
-float triIncrement = 1.0f;
+float triIncrement = 0.3f;
 
 float curAngle = 0.0f;
 
@@ -54,7 +54,7 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 {
 	// For each face in a mesh, ln0, ln1, ln2 correspond to each vertex of that face.
 	// We want to create two new vector 
-	for (size_t i = 0; i <= indiceCount; i += 3) 
+	for (size_t i = 0; i < indiceCount; i += 3) 
 	{
 		unsigned int ln0 = indices[i] * vLength;
 		unsigned int ln1 = indices[i + 1] * vLength;
@@ -113,15 +113,18 @@ void CreateShaders()
 
 int main()
 {
-	mainWindow = Window(800, 600);
+	mainWindow = Window(1600, 900);
 	mainWindow.Initialise();
 
+	// Start Pos (x,y,z)
+	// Start Up (x,y,z)
+	// GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -10.0f, 5.0f, 0.05f);
 
-	woodTexture = Texture("Textures/wood.png");
+	woodTexture = Texture("Textures/brick.png");
 	woodTexture.LoadTexture();
 
-	mainLight = Light(1.0f, 1.0f, 1.0f, 0.65f, 2.0f, -1.0f, -2.0f, 1.0f);
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.2f, 2.0f, -1.0f, -2.0f, 1.0f);
 
 	CreateObjects();
 	CreateShaders();
@@ -174,8 +177,8 @@ int main()
 		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
 
 		glm::mat4 model(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(0.0f, triOffset, -2.5f)); // Apply a translation matrix to the model matrix
-		model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, triOffset, -4.5f)); // Apply a translation matrix to the model matrix
+		//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));

@@ -23,5 +23,5 @@ void main()
 	vec4 diffuseColour = vec4(directionalLight.colour, 1.0f) * directionalLight.diffuseIntensity * diffuseFactor;
 	
 	
-	colour = texture(theTexture, texCoord) * ambientColour + diffuseColour;
+	colour = texture(theTexture, texCoord) * (ambientColour + diffuseColour);
 }
