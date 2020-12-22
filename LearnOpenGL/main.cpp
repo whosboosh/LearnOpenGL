@@ -83,14 +83,52 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 	}
 }
 
+void CalcNormals(GLfloat* vertices, unsigned int verticeCount, unsigned int normalOffset) 
+{
+	for (int i = 0; i < verticeCount/3; i++)
+	{
+		unsigned int ln0 = i*24;
+		unsigned int ln1 = i*24 + 8;
+		unsigned int ln2 = i*24 + 16;
+
+		glm::vec3 v1(vertices[ln1] - vertices[ln0], vertices[ln1 + 1] - vertices[ln0 + 1], vertices[ln1 + 2] - vertices[ln0 + 2]);
+		glm::vec3 v2(vertices[ln2] - vertices[ln0], vertices[ln2 + 1] - vertices[ln0 + 1], vertices[ln2 + 2] - vertices[ln0 + 2]);
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
+		vertices[ln0] += normal.x; vertices[ln0 + 1] += normal.y; vertices[ln0 + 2] += normal.z;
+		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
+		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
+	}
+}
+
 
 void CreateObjects() {
-	GLfloat vertices[] = {
+	GLfloat verticesIndex[] = {
 	//	x	   y      z     u     v     nx    ny    nz
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+	};
+
+	GLfloat vertices[] = {
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 	};
 
 	unsigned int indices[] = {
@@ -100,14 +138,15 @@ void CreateObjects() {
 		0,1,2
 	};
 
-	calcAverageNormals(indices, 12, vertices, 32, 8, 5);
+	calcAverageNormals(indices, 12, verticesIndex, 32, 8, 5);
+	CalcNormals(vertices, 12, 5);
 
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
+	obj1->CreateMesh(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(vertices, indices, 32, 12);
+	obj2->CreateMesh(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
 	meshList.push_back(obj2);
 }
 
