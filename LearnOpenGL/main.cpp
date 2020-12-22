@@ -18,6 +18,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Light.h"
+#include "Material.h"
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -26,14 +27,17 @@ Camera camera;
 
 Texture woodTexture;
 
+Material shinyMaterial;
+Material dullMaterial;
+
 Light mainLight;
 
 const float toRadians = 3.14159265f / 180.0f;
 
 bool direction = true;
 float triOffset = 0.0f;
-float triMaxOffset = 0.7f;
-float triIncrement = 0.3f;
+float triMaxOffset = 2.0f;
+float triIncrement = 0.5f;
 
 float curAngle = 0.0f;
 
@@ -101,6 +105,10 @@ void CreateObjects() {
 	Mesh* obj1 = new Mesh();
 	obj1->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
 	meshList.push_back(obj1);
+
+	Mesh* obj2 = new Mesh();
+	obj2->CreateMesh(vertices, indices, 32, 12);
+	meshList.push_back(obj2);
 }
 
 void CreateShaders()
@@ -109,6 +117,19 @@ void CreateShaders()
 
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
+}
+
+void ComputePositionOffsets(float& fXOffset, float& fYOffset)
+{
+	const float fLoopDuration = 5.0f;
+	const float fScale = 3.14159f * 2.0f / fLoopDuration;
+
+	float fElapsedTime = glfwGetTime();
+
+	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+
+	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 6.0f;
+	fYOffset = (sinf(fCurrTimeThroughLoop * fScale) * 6.0f) + -3.0f;
 }
 
 int main()
@@ -124,13 +145,20 @@ int main()
 	woodTexture = Texture("Textures/brick.png");
 	woodTexture.LoadTexture();
 
-	mainLight = Light(1.0f, 1.0f, 1.0f, 0.2f, 2.0f, -1.0f, -2.0f, 1.0f);
+	shinyMaterial = Material(0.6f, 32);
+	dullMaterial = Material(0.3f, 4);
+
+	// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, 3.0f, 1.5f, -1.0f, 0.4f);
 
 	CreateObjects();
 	CreateShaders();
 
 	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0, uniformDirection = 0, uniformDiffuseIntensity = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
+		uniformAmbientIntensity = 0, uniformAmbientColour = 0, uniformDirection = 0, uniformDiffuseIntensity = 0,
+		uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0;
+
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
@@ -138,8 +166,14 @@ int main()
 	uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
 	uniformDirection = shaderList[0].GetDirectionLocation();
 	uniformDiffuseIntensity = shaderList[0].GetDiffuseIntensityLocation();
+	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
+	uniformSpecularShininess = shaderList[0].GetSpecularShininessLocation();
+	uniformEyePosition = shaderList[0].GetEyePositionLocation();
 
-	glm::mat4 projection = glm::perspective(70.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
+
+	float yOffset = 0.0f;
+	float xOffset = 0.0f;
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
@@ -173,20 +207,34 @@ int main()
 		curAngle += 30.0f * deltaTime;
 		if (curAngle >= 360.0f) curAngle = 0.0f;
 
+		ComputePositionOffsets(xOffset, yOffset);
+		// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
+		mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, xOffset, 2.0f, yOffset, 0.6f);
+
 		// Use light source
 		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
 
+		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+
 		glm::mat4 model(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(0.0f, triOffset, -4.5f)); // Apply a translation matrix to the model matrix
+		model = glm::translate(model, glm::vec3(1.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
 		//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
 		// Textures
 		woodTexture.UseTexture();
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 		meshList[0]->RenderMesh();
+
+		model = glm::mat4(1.0f); // Identity matrix
+		model = glm::translate(model, glm::vec3(xOffset, 2.0f, yOffset));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+		meshList[1]->RenderMesh();
 
 		glUseProgram(0);
 

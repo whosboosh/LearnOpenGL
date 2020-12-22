@@ -11,6 +11,8 @@ Camera::Camera(glm::vec3 startPos, glm::vec3 startUp, GLfloat startYaw, GLfloat 
 	worldUp = startUp;
 	yaw = startYaw;
 	pitch = startPitch;
+	front = glm::vec3(0.0f, 0.0f, -1.0f);
+
 	moveSpeed = startMoveSpeed;
 	turnSpeed = startTurnSpeed;
 
@@ -58,6 +60,11 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 glm::mat4 Camera::calculateViewMatrix()
 {
 	return glm::lookAt(position, position + front, up);
+}
+
+glm::vec3 Camera::getCameraPosition()
+{
+	return position;
 }
 
 void Camera::update()
