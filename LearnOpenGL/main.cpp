@@ -142,11 +142,11 @@ void CreateObjects() {
 	CalcNormals(vertices, 12, 5);
 
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
+	obj1->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
+	obj2->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
 	meshList.push_back(obj2);
 }
 
