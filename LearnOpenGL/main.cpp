@@ -139,77 +139,6 @@ void CreateObjects() {
 		0,1,2
 	};
 
-	/*
-		GLfloat vertices2[] = {
-		// Back
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-
-		// Front
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-
-		// Left
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-
-		// Right
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-
-		 // Bottom
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-
-		// Top
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-	};
-	*/
-	/*
-	GLfloat vertices[] = {
-		0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back right down
-		-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back Left down
-		0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back right up
-		-0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back left up
-		0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front right down
-		0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front right up
-		-0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front Left down
-		-0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front left up 7
-	};
-
-	unsigned int indices[] = {
-		1, 3, 0, // Back l
-		3, 2, 0, // Back r
-		7, 4, 6, // Front l
-		7, 5, 4, // Front r
-	};
-	*/
-
 	int numIndices = sizeof(indices) / sizeof(*indices);
 	//CalcNormals(vertices, 12, 5);
 	calcAverageNormals(indices, numIndices, vertices, 32, 8, 5);
@@ -336,7 +265,7 @@ int main()
 
 		glm::mat4 model(1.0f); // Identity matrix
 		model = glm::translate(model, glm::vec3(1.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
-		//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
