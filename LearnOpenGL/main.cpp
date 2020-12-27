@@ -104,24 +104,63 @@ void CalcNormals(GLfloat* vertices, unsigned int verticeCount, unsigned int norm
 }
 
 void CreateObjects() {
-	GLfloat vertices[] = {
-		-1.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left up
-		-1.0f, -1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left down
-		1.0f, 1.0f, 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, // Front right up
-		1.0f, -1.0f, 0.0f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, // Front right down
-		-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back left Up
+	GLfloat oldVertices[] = {
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left up
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Front left down
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Front right up
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Front right down
+
+		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Back left Up
 		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back left down
-		1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back right up
-		1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // Back right down
+		1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Back right up
+		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f  // Back right down
 	};
 
+
+	GLfloat vertices[] = {
+		// Beep
+		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //0
+		 1.0f, -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+
+		 // Right
+		 1.0f, -1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f, //4
+		 1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+
+		 // Back
+		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, //8
+		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f,  1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+
+		// Left
+		-1.0f, -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //12
+		-1.0f, -1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f,  1.0f, -1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f,  1.0f,  1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+
+		// Bottom
+		-1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f, //16
+		 1.0f, -1.0f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		-1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+		 // Top
+		-1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //20 /LF
+		 1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RF
+		-1.0f,  1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f, // LB
+		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RB
+	};
 	unsigned int indices[] = {
-		0, 2, 3, 0, 3, 1,
-		2, 6, 7, 2, 7, 3,
-		6, 4, 5, 6, 5, 7,
-		4, 0, 1, 4, 1, 5,
-		0, 4, 6, 0, 6, 2,
-		1, 5, 7, 1, 7, 3,
+		2,3,1, 1,0,2,  //Face front
+		6,7,4, 4,5,6, //Face right
+		9,8,10, 10,11,9, // Back
+		13,12,14, 14,15,13, // Left
+		19,17,16, 16,18,19, // Bottom
+		20,22,23, 23,21,20, // Top
 	};
 
 	GLfloat vertices2[] = {
@@ -141,9 +180,9 @@ void CreateObjects() {
 
 	int numIndices = sizeof(indices) / sizeof(*indices);
 	//CalcNormals(vertices, 12, 5);
-	calcAverageNormals(indices, numIndices, vertices, 32, 8, 5);
+	calcAverageNormals(indices, numIndices, vertices, sizeof(vertices) / sizeof(*vertices), 8, 5);
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMeshIndex(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), numIndices);
+	obj1->CreateMeshIndex(vertices, indices, sizeof(vertices) / sizeof(*vertices), numIndices);
 	meshList.push_back(obj1);
 
 	numIndices = sizeof(indices2) / sizeof(*indices2);
@@ -191,7 +230,7 @@ int main()
 	dullMaterial = Material(0.3f, 4);
 
 	// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
-	mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, 3.0f, 1.5f, -1.0f, 0.4f);
+	mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, 3.0f, 3.0f, -1.0f, 0.4f);
 
 	CreateObjects();
 	CreateShaders();
@@ -254,7 +293,7 @@ int main()
 
 		ComputePositionOffsets(xOffset, yOffset);
 		// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
-		mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, xOffset, 2.0f, yOffset, 0.6f);
+		mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, xOffset, 3.0f, yOffset, 0.6f);
 
 		// Use light source
 		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
@@ -280,7 +319,7 @@ int main()
 
 
 		model = glm::mat4(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(xOffset, 2.0f, yOffset));
+		model = glm::translate(model, glm::vec3(xOffset, 3.0f, yOffset));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
