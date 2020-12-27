@@ -104,7 +104,27 @@ void CalcNormals(GLfloat* vertices, unsigned int verticeCount, unsigned int norm
 }
 
 void CreateObjects() {
-	GLfloat verticesIndex[] = {
+	GLfloat vertices[] = {
+		-1.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left up
+		-1.0f, -1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left down
+		1.0f, 1.0f, 0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, // Front right up
+		1.0f, -1.0f, 0.0f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, // Front right down
+		-1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back left Up
+		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back left down
+		1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back right up
+		1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // Back right down
+	};
+
+	unsigned int indices[] = {
+		0, 2, 3, 0, 3, 1,
+		2, 6, 7, 2, 7, 3,
+		6, 4, 5, 6, 5, 7,
+		4, 0, 1, 4, 1, 5,
+		0, 4, 6, 0, 6, 2,
+		1, 5, 7, 1, 7, 3,
+	};
+
+	GLfloat vertices2[] = {
 		//	x	   y      z     u     v   nx   ny   nz
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -112,7 +132,16 @@ void CreateObjects() {
 		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
 	};
 
-	GLfloat vertices[] = {
+	unsigned int indices2[] = {
+		0,3,1,
+		1,2,3,
+		2,3,0,
+		0,1,2
+	};
+
+	/*
+		GLfloat vertices2[] = {
+		// Back
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
@@ -120,6 +149,7 @@ void CreateObjects() {
 		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 
+		// Front
 		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
@@ -127,6 +157,7 @@ void CreateObjects() {
 		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 
+		// Left
 		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
@@ -134,6 +165,7 @@ void CreateObjects() {
 		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 
+		// Right
 		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
@@ -141,6 +173,7 @@ void CreateObjects() {
 		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 
+		 // Bottom
 		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
@@ -148,6 +181,7 @@ void CreateObjects() {
 		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 
+		// Top
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
 		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
@@ -155,23 +189,38 @@ void CreateObjects() {
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
 	};
-
-	unsigned int indices[] = {
-		0,3,1,
-		1,2,3,
-		2,3,0,
-		0,1,2
+	*/
+	/*
+	GLfloat vertices[] = {
+		0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back right down
+		-0.5, -0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back Left down
+		0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back right up
+		-0.5, 0.5, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Back left up
+		0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front right down
+		0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front right up
+		-0.5, -0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front Left down
+		-0.5, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // Front left up 7
 	};
 
-	calcAverageNormals(indices, 12, verticesIndex, 32, 8, 5);
-	CalcNormals(vertices, 12, 5);
+	unsigned int indices[] = {
+		1, 3, 0, // Back l
+		3, 2, 0, // Back r
+		7, 4, 6, // Front l
+		7, 5, 4, // Front r
+	};
+	*/
 
+	int numIndices = sizeof(indices) / sizeof(*indices);
+	//CalcNormals(vertices, 12, 5);
+	calcAverageNormals(indices, numIndices, vertices, 32, 8, 5);
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, (sizeof(vertices) / sizeof(*vertices)));
+	obj1->CreateMeshIndex(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), numIndices);
 	meshList.push_back(obj1);
 
+	numIndices = sizeof(indices2) / sizeof(*indices2);
+	calcAverageNormals(indices2, numIndices, vertices2, 32, 8, 5);
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMeshIndex(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
+	obj2->CreateMeshIndex(vertices2, indices2, (sizeof(vertices2) / sizeof(*vertices2)), numIndices);
 	meshList.push_back(obj2);
 }
 
@@ -185,7 +234,7 @@ void CreateShaders()
 
 void ComputePositionOffsets(float& fXOffset, float& fYOffset)
 {
-	const float fLoopDuration = 5.0f;
+	const float fLoopDuration = 10.0f;
 	const float fScale = 3.14159f * 2.0f / fLoopDuration;
 
 	float fElapsedTime = glfwGetTime();
@@ -298,7 +347,7 @@ int main()
 		glUniform1i(uniformShouldUseTexture, 1);
 		woodTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-		meshList[0]->RenderMesh();
+		meshList[0]->RenderMeshIndex();
 
 
 		model = glm::mat4(1.0f); // Identity matrix
