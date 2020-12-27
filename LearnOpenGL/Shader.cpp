@@ -87,6 +87,8 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 	uniformSpecularIntensity = glGetUniformLocation(shaderID, "material.specularIntensity");
 	uniformSpecularShininess = glGetUniformLocation(shaderID, "material.shininess");
 	uniformEyePositionLocation = glGetUniformLocation(shaderID, "eyePosition");
+	uniformInverseTransposeLocation = glGetUniformLocation(shaderID, "inverseTransposeModel");
+	uniformShouldUseTexture = glGetUniformLocation(shaderID, "shouldUseTexture");
 }
 
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -163,6 +165,16 @@ GLuint Shader::GetSpecularShininessLocation()
 GLuint Shader::GetEyePositionLocation()
 {
 	return uniformEyePositionLocation;
+}
+
+GLuint Shader::GetInverseTransposeModelLocation()
+{
+	return uniformInverseTransposeLocation;
+}
+
+GLuint Shader::GetUniformShouldUseTextureLocation()
+{
+	return uniformShouldUseTexture;
 }
 
 void Shader::UseShader()

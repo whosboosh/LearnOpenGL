@@ -27,6 +27,8 @@ public:
 	GLuint GetSpecularIntensityLocation();
 	GLuint GetSpecularShininessLocation();
 	GLuint GetEyePositionLocation();
+	GLuint GetInverseTransposeModelLocation();
+	GLuint GetUniformShouldUseTextureLocation();
 
 	void UseShader();
 	void ClearShader();
@@ -36,7 +38,8 @@ public:
 private:
 	GLuint shaderID, uniformProjection, uniformModel, uniformView,
 		uniformAmbientIntensity, uniformAmbientColour, uniformDiffuseIntensity,
-		uniformDirection, uniformSpecularIntensity, uniformSpecularShininess, uniformEyePositionLocation;
+		uniformDirection, uniformSpecularIntensity, uniformSpecularShininess, uniformEyePositionLocation, uniformInverseTransposeLocation,
+		uniformShouldUseTexture;
 
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);

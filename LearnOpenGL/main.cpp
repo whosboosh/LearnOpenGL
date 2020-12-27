@@ -83,14 +83,77 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 	}
 }
 
+void CalcNormals(GLfloat* vertices, unsigned int verticeCount, unsigned int normalOffset)
+{
+	for (int i = 0; i < verticeCount / 3; i++)
+	{
+		unsigned int ln0 = i * 24;
+		unsigned int ln1 = i * 24 + 8;
+		unsigned int ln2 = i * 24 + 16;
+
+		glm::vec3 v1(vertices[ln1] - vertices[ln0], vertices[ln1 + 1] - vertices[ln0 + 1], vertices[ln1 + 2] - vertices[ln0 + 2]);
+		glm::vec3 v2(vertices[ln2] - vertices[ln0], vertices[ln2 + 1] - vertices[ln0 + 1], vertices[ln2 + 2] - vertices[ln0 + 2]);
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
+		vertices[ln0] += normal.x; vertices[ln0 + 1] += normal.y; vertices[ln0 + 2] += normal.z;
+		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
+		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
+	}
+}
 
 void CreateObjects() {
-	GLfloat vertices[] = {
-	//	x	   y      z     u     v     nx    ny    nz
+	GLfloat verticesIndex[] = {
+		//	x	   y      z     u     v   nx   ny   nz
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+	};
+
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
 	};
 
 	unsigned int indices[] = {
@@ -100,14 +163,15 @@ void CreateObjects() {
 		0,1,2
 	};
 
-	calcAverageNormals(indices, 12, vertices, 32, 8, 5);
+	calcAverageNormals(indices, 12, verticesIndex, 32, 8, 5);
+	CalcNormals(vertices, 12, 5);
 
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, (sizeof(vertices) / sizeof(*vertices)), 12);
+	obj1->CreateMesh(vertices, (sizeof(vertices) / sizeof(*vertices)));
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMesh(vertices, indices, 32, 12);
+	obj2->CreateMeshIndex(verticesIndex, indices, (sizeof(verticesIndex) / sizeof(*verticesIndex)), 12);
 	meshList.push_back(obj2);
 }
 
@@ -157,7 +221,8 @@ int main()
 	// Uniform
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
 		uniformAmbientIntensity = 0, uniformAmbientColour = 0, uniformDirection = 0, uniformDiffuseIntensity = 0,
-		uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0;
+		uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0, 
+		uniformShouldUseTexture = 0;
 
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
@@ -169,6 +234,8 @@ int main()
 	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 	uniformSpecularShininess = shaderList[0].GetSpecularShininessLocation();
 	uniformEyePosition = shaderList[0].GetEyePositionLocation();
+	uniformInverseTranspose = shaderList[0].GetInverseTransposeModelLocation();
+	uniformShouldUseTexture = shaderList[0].GetUniformShouldUseTextureLocation();
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
@@ -224,17 +291,28 @@ int main()
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
+		// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
+		glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+
 		// Textures
+		glUniform1i(uniformShouldUseTexture, 1);
 		woodTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 		meshList[0]->RenderMesh();
+
 
 		model = glm::mat4(1.0f); // Identity matrix
 		model = glm::translate(model, glm::vec3(xOffset, 2.0f, yOffset));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+		// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
+		glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+
+		glUniform1i(uniformShouldUseTexture, 0);
+		woodTexture.RemoveTexture();
 		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-		meshList[1]->RenderMesh();
+		meshList[1]->RenderMeshIndex();
 
 		glUseProgram(0);
 

@@ -45,7 +45,13 @@ void Texture::UseTexture()
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-;}
+}
+
+void Texture::RemoveTexture()
+{
+	glDisable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 void Texture::ClearTexture()
 {

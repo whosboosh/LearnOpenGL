@@ -24,6 +24,7 @@ struct Material
 uniform sampler2D theTexture;
 uniform DirectionalLight directionalLight;
 uniform Material material;
+uniform bool shouldUseTexture;
 
 uniform vec3 eyePosition;
 
@@ -48,6 +49,11 @@ void main()
 			specularColour = vec4(directionalLight.colour * material.specularIntensity * specularFactor, 1.0);
 		}
 	}
-	
-	colour = texture(theTexture, TexCoord) * (ambientColour + diffuseColour + specularColour);
+	if (shouldUseTexture)
+	{
+		colour = texture(theTexture, TexCoord) * (ambientColour + diffuseColour + specularColour);
+	}
+	else {
+		colour = vCol;
+	}
 }
