@@ -17,6 +17,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "PointLight.h"
 #include "DirectionalLight.h"
 #include "Material.h"
 
@@ -31,6 +32,7 @@ Material shinyMaterial;
 Material dullMaterial;
 
 DirectionalLight mainLight;
+PointLight pointLights[MAX_POINT_LIGHTS];
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -200,7 +202,7 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
-void ComputePositionOffsets(float& fXOffset, float& fYOffset)
+void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 {
 	const float fLoopDuration = 10.0f;
 	const float fScale = 3.14159f * 2.0f / fLoopDuration;
@@ -210,7 +212,7 @@ void ComputePositionOffsets(float& fXOffset, float& fYOffset)
 	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
 
 	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 6.0f;
-	fYOffset = (sinf(fCurrTimeThroughLoop * fScale) * 6.0f) + -3.0f;
+	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 6.0f) + -3.0f;
 }
 
 int main()
@@ -228,11 +230,6 @@ int main()
 
 	shinyMaterial = Material(0.6f, 32);
 	dullMaterial = Material(0.3f, 4);
-
-	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
-	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f, 
-		0.1f, 0.4f, 
-		3.0f, 3.0f, -1.0f);
 
 	CreateObjects();
 	CreateShaders();
@@ -253,8 +250,36 @@ int main()
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
-	float yOffset = 0.0f;
 	float xOffset = 0.0f;
+	float zOffset = 2.0f;
+
+	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
+	/*
+	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
+		0.1f, 0.6f,
+		xOffset, 3.0f, zOffset);
+	unsigned int pointLightCount = 0;
+	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
+		0.1f, 1.0f,
+		-4.0f, 0.0f, 0.0f,
+		xOffset + 1.5f, 3.0f, zOffset);
+	pointLightCount++;
+	*/
+	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
+		0.1f, 1.0f,
+		xOffset, 3.0f, zOffset);
+
+	unsigned int pointLightCount = 0;
+	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f,
+		xOffset+3.0f, 3.0f, zOffset,
+		0.3f, 0.2f, 0.1f);
+	pointLightCount++;
+	pointLights[1] = PointLight(0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f,
+		-4.0f, 2.0f, 0.0f,
+		0.3f, 0.1f, 0.1f);
+	pointLightCount++;
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
@@ -288,13 +313,11 @@ int main()
 		curAngle += 30.0f * deltaTime;
 		if (curAngle >= 360.0f) curAngle = 0.0f;
 
-		ComputePositionOffsets(xOffset, yOffset);
-		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ)
-		mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-			0.1f, 0.6f,
-			xOffset, 3.0f, yOffset);
+		//ComputePositionOffsets(xOffset, zOffset);
 
 		shaderList[0].SetDirectionalLight(&mainLight); // Calls UseLight in Shader
+		shaderList[0].SetPointLights(pointLights, pointLightCount);
+
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
@@ -317,7 +340,7 @@ int main()
 
 
 		model = glm::mat4(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(xOffset, 3.0f, yOffset));
+		model = glm::translate(model, glm::vec3(xOffset, 3.0f, zOffset));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 

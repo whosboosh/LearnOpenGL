@@ -10,6 +10,8 @@
 
 #include <GLAD\glad.h>
 
+const int MAX_POINT_LIGHTS = 3;
+
 class Shader
 {
 public:
@@ -34,6 +36,7 @@ public:
 	GLuint GetUniformShouldUseTextureLocation();
 
 	void SetDirectionalLight(DirectionalLight *dLight);
+	void SetPointLights(PointLight* pLight, unsigned int lightCount);
 
 	void UseShader();
 	void ClearShader();
@@ -41,8 +44,7 @@ public:
 	~Shader();
 
 private:
-	int pointLightCount;
-	 
+	GLuint uniformPointLightCount;
 
 	GLuint shaderID, uniformProjection, uniformModel, uniformView,
 		uniformSpecularIntensity, uniformSpecularShininess, uniformEyePosition, uniformInverseTranspose,
@@ -55,6 +57,17 @@ private:
 
 		GLuint uniformDirection;
 	} uniformDirectionalLight;
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformPosition;
+		GLuint uniformConstant;
+		GLuint uniformLinear;
+		GLuint uniformExponent;
+	} uniformPointLight[MAX_POINT_LIGHTS];
 
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
