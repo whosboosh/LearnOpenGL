@@ -17,7 +17,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Texture.h"
-#include "Light.h"
+#include "DirectionalLight.h"
 #include "Material.h"
 
 Window mainWindow;
@@ -30,7 +30,7 @@ Texture woodTexture;
 Material shinyMaterial;
 Material dullMaterial;
 
-Light mainLight;
+DirectionalLight mainLight;
 
 const float toRadians = 3.14159265f / 180.0f;
 
@@ -229,8 +229,10 @@ int main()
 	shinyMaterial = Material(0.6f, 32);
 	dullMaterial = Material(0.3f, 4);
 
-	// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
-	mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, 3.0f, 3.0f, -1.0f, 0.4f);
+	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
+	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f, 
+		0.1f, 0.4f, 
+		3.0f, 3.0f, -1.0f);
 
 	CreateObjects();
 	CreateShaders();
@@ -292,8 +294,10 @@ int main()
 		if (curAngle >= 360.0f) curAngle = 0.0f;
 
 		ComputePositionOffsets(xOffset, yOffset);
-		// Red, Green, Blue, ambientIntensity, Pos(XYZ), diffuseIntensity
-		mainLight = Light(1.0f, 1.0f, 1.0f, 0.1f, xOffset, 3.0f, yOffset, 0.6f);
+		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ)
+		mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
+			0.1f, 0.6f,
+			xOffset, 3.0f, yOffset);
 
 		// Use light source
 		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
