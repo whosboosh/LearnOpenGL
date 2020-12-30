@@ -27,6 +27,7 @@ std::vector<Shader> shaderList;
 Camera camera;
 
 Texture woodTexture;
+Texture plainTexture;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -192,6 +193,23 @@ void CreateObjects() {
 	Mesh* obj2 = new Mesh();
 	obj2->CreateMeshIndex(vertices2, indices2, (sizeof(vertices2) / sizeof(*vertices2)), numIndices);
 	meshList.push_back(obj2);
+
+	GLfloat floorVertices[] = {
+		-10.0f, 0.0f, -10.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
+		10.0f, 0.0f, -10.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR
+		-10.f, 0.0f, 10.0f, 0.0f, 10.0f, 0.0f, -1.0f, 0.0f,//FL
+		10.0f, 0.0f, 10.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
+	};
+
+
+	unsigned int floorIndices[] = {
+		0, 2, 1,
+		1, 2, 3
+	};
+
+	Mesh* obj3 = new Mesh();
+	obj3->CreateMeshIndex(floorVertices, floorIndices, 32, 6);
+	meshList.push_back(obj3);
 }
 
 void CreateShaders()
@@ -228,7 +246,10 @@ int main()
 	woodTexture = Texture("Textures/brick.png");
 	woodTexture.LoadTexture();
 
-	shinyMaterial = Material(0.6f, 32);
+	plainTexture = Texture("Textures/plain.png");
+	plainTexture.LoadTexture();
+
+	shinyMaterial = Material(0.5, 128);
 	dullMaterial = Material(0.3f, 4);
 
 	CreateObjects();
@@ -251,7 +272,8 @@ int main()
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
 	float xOffset = 0.0f;
-	float zOffset = 2.0f;
+	float yOffset = 6.0f;
+	float zOffset = 10.0f;
 
 	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
 	/*
@@ -266,18 +288,18 @@ int main()
 	pointLightCount++;
 	*/
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-		0.1f, 1.0f,
-		xOffset, 3.0f, zOffset);
+		0.1f, 0.6f,
+		xOffset, yOffset, zOffset);
 
 	unsigned int pointLightCount = 0;
 	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f,
-		xOffset+3.0f, 3.0f, zOffset,
+		0.1f, 0.7f,
+		-2.0f, 2.0f, -3.0f,
 		0.3f, 0.2f, 0.1f);
 	pointLightCount++;
 	pointLights[1] = PointLight(0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f,
-		-4.0f, 2.0f, 0.0f,
+		0.1f, 0.7f,
+		4.0f, 2.0f, -3.0f,
 		0.3f, 0.1f, 0.1f);
 	pointLightCount++;
 
@@ -324,7 +346,7 @@ int main()
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
 		glm::mat4 model(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(1.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
+		model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
 		model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -340,7 +362,7 @@ int main()
 
 
 		model = glm::mat4(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(xOffset, 3.0f, zOffset));
+		model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -348,9 +370,17 @@ int main()
 		glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
 
 		glUniform1i(uniformShouldUseTexture, 0);
-		woodTexture.RemoveTexture();
 		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 		meshList[1]->RenderMeshIndex();
+
+		glUniform1i(uniformShouldUseTexture, 1);
+		model = glm::mat4(1.0f); // Identity matrix
+		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		plainTexture.UseTexture();
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+		meshList[2]->RenderMeshIndex();
+
 
 		glUseProgram(0);
 
