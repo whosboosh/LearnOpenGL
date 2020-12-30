@@ -239,17 +239,12 @@ int main()
 
 	// Uniform
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
-		uniformAmbientIntensity = 0, uniformAmbientColour = 0, uniformDirection = 0, uniformDiffuseIntensity = 0,
 		uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0, 
 		uniformShouldUseTexture = 0;
 
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
-	uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
-	uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
-	uniformDirection = shaderList[0].GetDirectionLocation();
-	uniformDiffuseIntensity = shaderList[0].GetDiffuseIntensityLocation();
 	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 	uniformSpecularShininess = shaderList[0].GetSpecularShininessLocation();
 	uniformEyePosition = shaderList[0].GetEyePositionLocation();
@@ -299,8 +294,7 @@ int main()
 			0.1f, 0.6f,
 			xOffset, 3.0f, yOffset);
 
-		// Use light source
-		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour , uniformDiffuseIntensity, uniformDirection);
+		shaderList[0].SetDirectionalLight(&mainLight); // Calls UseLight in Shader
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));

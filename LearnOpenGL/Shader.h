@@ -5,6 +5,9 @@
 #include <iostream>
 #include <fstream>
 
+#include "DirectionalLight.h"
+#include "PointLight.h"
+
 #include <GLAD\glad.h>
 
 class Shader
@@ -30,16 +33,28 @@ public:
 	GLuint GetInverseTransposeModelLocation();
 	GLuint GetUniformShouldUseTextureLocation();
 
+	void SetDirectionalLight(DirectionalLight *dLight);
+
 	void UseShader();
 	void ClearShader();
 
 	~Shader();
 
 private:
+	int pointLightCount;
+	 
+
 	GLuint shaderID, uniformProjection, uniformModel, uniformView,
-		uniformAmbientIntensity, uniformAmbientColour, uniformDiffuseIntensity,
-		uniformDirection, uniformSpecularIntensity, uniformSpecularShininess, uniformEyePositionLocation, uniformInverseTransposeLocation,
+		uniformSpecularIntensity, uniformSpecularShininess, uniformEyePosition, uniformInverseTranspose,
 		uniformShouldUseTexture;
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformDirection;
+	} uniformDirectionalLight;
 
 	void CompileShader(const char* vertexCode, const char* fragmentCode);
 	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);

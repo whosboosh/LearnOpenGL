@@ -80,14 +80,14 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 	uniformProjection = glGetUniformLocation(shaderID, "projection");
 	uniformModel = glGetUniformLocation(shaderID, "model");
 	uniformView = glGetUniformLocation(shaderID, "view");
-	uniformAmbientIntensity = glGetUniformLocation(shaderID, "directionalLight.ambientIntensity");
-	uniformAmbientColour = glGetUniformLocation(shaderID, "directionalLight.colour");
-	uniformDiffuseIntensity = glGetUniformLocation(shaderID, "directionalLight.diffuseIntensity");
-	uniformDirection = glGetUniformLocation(shaderID, "directionalLight.direction");
+	uniformDirectionalLight.uniformAmbientIntensity = glGetUniformLocation(shaderID, "directionalLight.ambientIntensity");
+	uniformDirectionalLight.uniformColour = glGetUniformLocation(shaderID, "directionalLight.colour");
+	uniformDirectionalLight.uniformDiffuseIntensity = glGetUniformLocation(shaderID, "directionalLight.diffuseIntensity");
+	uniformDirectionalLight.uniformDirection = glGetUniformLocation(shaderID, "directionalLight.direction");
 	uniformSpecularIntensity = glGetUniformLocation(shaderID, "material.specularIntensity");
 	uniformSpecularShininess = glGetUniformLocation(shaderID, "material.shininess");
-	uniformEyePositionLocation = glGetUniformLocation(shaderID, "eyePosition");
-	uniformInverseTransposeLocation = glGetUniformLocation(shaderID, "inverseTransposeModel");
+	uniformEyePosition = glGetUniformLocation(shaderID, "eyePosition");
+	uniformInverseTranspose = glGetUniformLocation(shaderID, "inverseTransposeModel");
 	uniformShouldUseTexture = glGetUniformLocation(shaderID, "shouldUseTexture");
 }
 
@@ -134,22 +134,22 @@ GLuint Shader::GetViewLocation()
 
 GLuint Shader::GetAmbientIntensityLocation()
 {
-	return uniformAmbientIntensity;
+	return uniformDirectionalLight.uniformAmbientIntensity;
 }
 
 GLuint Shader::GetAmbientColourLocation()
 {
-	return uniformAmbientColour;
+	return uniformDirectionalLight.uniformColour;
 }
 
 GLuint Shader::GetDiffuseIntensityLocation()
 {
-	return uniformDiffuseIntensity;
+	return uniformDirectionalLight.uniformDiffuseIntensity;
 }
 
 GLuint Shader::GetDirectionLocation()
 {
-	return uniformDirection;
+	return uniformDirectionalLight.uniformDirection;
 }
 
 GLuint Shader::GetSpecularIntensityLocation()
@@ -164,17 +164,22 @@ GLuint Shader::GetSpecularShininessLocation()
 
 GLuint Shader::GetEyePositionLocation()
 {
-	return uniformEyePositionLocation;
+	return uniformEyePosition;
 }
 
 GLuint Shader::GetInverseTransposeModelLocation()
 {
-	return uniformInverseTransposeLocation;
+	return uniformInverseTranspose;
 }
 
 GLuint Shader::GetUniformShouldUseTextureLocation()
 {
 	return uniformShouldUseTexture;
+}
+
+void Shader::SetDirectionalLight(DirectionalLight* dLight)
+{
+	dLight->UseLight(uniformDirectionalLight.uniformAmbientIntensity, uniformDirectionalLight.uniformColour, uniformDirectionalLight.uniformDiffuseIntensity, uniformDirectionalLight.uniformDirection);
 }
 
 void Shader::UseShader()
