@@ -8,11 +8,13 @@ out vec4 vCol;
 out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
+out vec4 DirectionalLightSpacePos;
 
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 inverseTransposeModel;
+uniform mat4 directionalLightTransform; 
 
 void main()
 {
@@ -20,9 +22,12 @@ void main()
 	//vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);
 	vCol = vec4(1.0f, 1.0f, 1.0f, 1.0f); // white
 	
+	DirectionalLightSpacePos = directionalLightTransform * model * vec4(pos, 1.0);
+	
 	TexCoord = tex;
 	
 	Normal = mat3(inverseTransposeModel) * norm;
 	
 	FragPos = vec3(model * vec4(pos, 1.0)); 
+	
 }

@@ -9,6 +9,8 @@
 #include "PointLight.h"
 
 #include <GLAD\glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 const int MAX_POINT_LIGHTS = 3;
 
@@ -38,6 +40,10 @@ public:
 	void SetDirectionalLight(DirectionalLight *dLight);
 	void SetPointLights(PointLight* pLight, unsigned int lightCount);
 
+	void SetTexture(GLuint textureUnit);
+	void SetDirectionalLightTransform(glm::mat4* lTransform);
+	void SetDirectionalShadowMap(GLuint textureUnit);
+
 	void UseShader();
 	void ClearShader();
 
@@ -48,7 +54,7 @@ private:
 
 	GLuint shaderID, uniformProjection, uniformModel, uniformView,
 		uniformSpecularIntensity, uniformSpecularShininess, uniformEyePosition, uniformInverseTranspose,
-		uniformShouldUseTexture;
+		uniformShouldUseTexture, uniformDirectionalLightTransform, uniformDirectionalShadowMap, uniformTexture;
 
 	struct {
 		GLuint uniformColour;

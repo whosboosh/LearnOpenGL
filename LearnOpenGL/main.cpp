@@ -1,6 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-
 #include <GLAD\glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
@@ -21,9 +20,23 @@
 #include "DirectionalLight.h"
 #include "Material.h"
 
+// Uniform
+GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
+uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0,
+uniformShouldUseTexture = 0;
+
+unsigned int pointLightCount = 0;
+
+float xOffset = 0.0f;
+float yOffset = -6.0f;
+float zOffset = 0.0f;
+
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+
+Shader directionalShadowShader;
+
 Camera camera;
 
 Texture woodTexture;
@@ -56,12 +69,12 @@ bool sizeDirection = false;
 static const char* vShader = "Shaders/shader.vert";
 static const char* fShader = "Shaders/shader.frag";
 
-void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat *vertices,
+void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices,
 	unsigned int verticeCount, unsigned int vLength, unsigned int normalOffset)
 {
 	// For each face in a mesh, ln0, ln1, ln2 correspond to each vertex of that face.
 	// We want to create two new vector 
-	for (size_t i = 0; i < indiceCount; i += 3) 
+	for (size_t i = 0; i < indiceCount; i += 3)
 	{
 		unsigned int ln0 = indices[i] * vLength;
 		unsigned int ln1 = indices[i + 1] * vLength;
@@ -73,7 +86,7 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 		normal = glm::normalize(normal);
 
 		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
-		vertices[ln0] += normal.x; vertices[ln0  + 1] += normal.y; vertices[ln0 + 2] += normal.z;
+		vertices[ln0] += normal.x; vertices[ln0 + 1] += normal.y; vertices[ln0 + 2] += normal.z;
 		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
 		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
 	}
@@ -195,11 +208,18 @@ void CreateObjects() {
 	meshList.push_back(obj2);
 
 	GLfloat floorVertices[] = {
-		-10.0f, 0.0f, -10.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
-		10.0f, 0.0f, -10.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR
-		-10.f, 0.0f, 10.0f, 0.0f, 10.0f, 0.0f, -1.0f, 0.0f,//FL
-		10.0f, 0.0f, 10.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
+		-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
+		20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR
+		-20.f, 0.0f, 20.0f, 0.0f, 10.0f, 0.0f, -1.0f, 0.0f,//FL
+		20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
 	};
+
+	/*
+	-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, -1.0f, -1.0f, 1.0f,//BL
+	20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 1.0f, -1.0f, 1.0f,//BR
+	-20.f, 0.0f, 20.0f, 0.0f, 10.0f, -1.0f, -1.0f, -1.0f,//FL
+	20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 1.0f, -1.0f, -1.0f//FR
+*/
 
 
 	unsigned int floorIndices[] = {
@@ -218,19 +238,126 @@ void CreateShaders()
 
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
+
+	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
 }
 
 void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 {
-	const float fLoopDuration = 10.0f;
+	const float fLoopDuration = 20.0f;
 	const float fScale = 3.14159f * 2.0f / fLoopDuration;
 
 	float fElapsedTime = glfwGetTime();
 
 	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
 
-	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 6.0f;
-	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 6.0f) + -3.0f;
+	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
+	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
+}
+
+void RenderScene()
+{
+	if (direction)
+	{
+		triOffset += triIncrement * deltaTime;
+	}
+	else {
+		triOffset -= triIncrement * deltaTime;
+	}
+	if (abs(triOffset) >= triMaxOffset) {
+		direction = !direction;
+	}
+	curAngle += 30.0f * deltaTime;
+	if (curAngle >= 360.0f) curAngle = 0.0f;
+
+	glm::mat4 model(1.0f); // Identity matrix
+	//model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
+	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
+	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+
+	// Textures
+	glUniform1i(uniformShouldUseTexture, 1);
+	woodTexture.UseTexture();
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	meshList[0]->RenderMeshIndex();
+
+
+	model = glm::mat4(1.0f); // Identity matrix
+	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
+	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
+	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+
+	glUniform1i(uniformShouldUseTexture, 0);
+	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	meshList[1]->RenderMeshIndex();
+
+	glUniform1i(uniformShouldUseTexture, 1);
+	model = glm::mat4(1.0f); // Identity matrix
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	plainTexture.UseTexture();
+	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	meshList[2]->RenderMeshIndex();
+}
+
+void DirectionalShadowMapPass(DirectionalLight* light)
+{
+	directionalShadowShader.UseShader();
+
+	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+
+	light->GetShadowMap()->Write();
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	uniformModel = directionalShadowShader.GetModelLocation();
+
+	glm::mat4 lightTransform = light->CalculateLightTransform();
+	directionalShadowShader.SetDirectionalLightTransform(&lightTransform);
+
+	RenderScene();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+{
+	shaderList[0].UseShader();
+
+	glViewport(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
+
+	// Clear window
+	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	uniformModel = shaderList[0].GetModelLocation();
+
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+
+	ComputePositionOffsets(xOffset, zOffset);
+	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
+	mainLight.UpdatePosition(xOffset, yOffset, zOffset);
+
+	shaderList[0].SetDirectionalLight(&mainLight);
+	shaderList[0].SetPointLights(pointLights, pointLightCount);
+
+	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
+	shaderList[0].SetDirectionalLightTransform(&lightTransform);
+
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
+	shaderList[0].SetTexture(0);
+	shaderList[0].SetDirectionalShadowMap(1);
+
+	RenderScene();
 }
 
 int main()
@@ -255,11 +382,6 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	// Uniform
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
-		uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0, 
-		uniformShouldUseTexture = 0;
-
 	uniformProjection = shaderList[0].GetProjectionLocation();
 	uniformModel = shaderList[0].GetModelLocation();
 	uniformView = shaderList[0].GetViewLocation();
@@ -271,27 +393,11 @@ int main()
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
-	float xOffset = 0.0f;
-	float yOffset = 6.0f;
-	float zOffset = 10.0f;
 
 	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
-	/*
-	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-		0.1f, 0.6f,
-		xOffset, 3.0f, zOffset);
-	unsigned int pointLightCount = 0;
-	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
-		0.1f, 1.0f,
-		-4.0f, 0.0f, 0.0f,
-		xOffset + 1.5f, 3.0f, zOffset);
-	pointLightCount++;
-	*/
-	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
-		0.1f, 0.6f,
+	mainLight = DirectionalLight(8192, 8192, 1.0f, 1.0f, 1.0f,
+		0.1f, 0.8f,
 		xOffset, yOffset, zOffset);
-
-	unsigned int pointLightCount = 0;
 	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
 		0.1f, 0.7f,
 		-2.0f, 2.0f, -3.0f,
@@ -313,74 +419,11 @@ int main()
 		// Business logic for application
 		glfwPollEvents();
 
-		// Clear window
-		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		camera.keyControl(mainWindow.getKeys(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
-		shaderList[0].UseShader();
-
-		if (direction)
-		{
-			triOffset += triIncrement * deltaTime;
-		}
-		else {
-			triOffset -= triIncrement * deltaTime;
-		}
-		if (abs(triOffset) >= triMaxOffset) {
-			direction = !direction;
-		}
-		curAngle += 30.0f * deltaTime;
-		if (curAngle >= 360.0f) curAngle = 0.0f;
-
-		//ComputePositionOffsets(xOffset, zOffset);
-
-		shaderList[0].SetDirectionalLight(&mainLight); // Calls UseLight in Shader
-		shaderList[0].SetPointLights(pointLights, pointLightCount);
-
-
-		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
-
-		glm::mat4 model(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
-		model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-		// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-		glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-
-		// Textures
-		glUniform1i(uniformShouldUseTexture, 1);
-		woodTexture.UseTexture();
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-		meshList[0]->RenderMeshIndex();
-
-
-		model = glm::mat4(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
-		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-		// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-		glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-
-		glUniform1i(uniformShouldUseTexture, 0);
-		dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-		meshList[1]->RenderMeshIndex();
-
-		glUniform1i(uniformShouldUseTexture, 1);
-		model = glm::mat4(1.0f); // Identity matrix
-		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		plainTexture.UseTexture();
-		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-		meshList[2]->RenderMeshIndex();
-
+		DirectionalShadowMapPass(&mainLight);
+		RenderPass(projection, camera.calculateViewMatrix());
 
 		glUseProgram(0);
 
