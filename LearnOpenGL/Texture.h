@@ -10,7 +10,7 @@ public:
 	Texture(const char* fileLoc);
 
 	void LoadTexture();
-	void UseTexture();
+	void UseTexture(GLenum textureUnit);
 	void ClearTexture();
 	void RemoveTexture();
 

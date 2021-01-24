@@ -141,7 +141,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32;$(SolutionDir)/../../externals/dlib-19.21</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,7 +158,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../externals/GLFW_32/include;$(SolutionDir)/../../externals/GLAD/include;$(SolutionDir)/../../externals/GLM_32;$(SolutionDir)/../../externals/dlib-19.21</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -5,6 +5,7 @@ in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
 in vec4 DirectionalLightSpacePos;
+//in mat3 mat3 TBN;
 
 out vec4 colour;
 
@@ -43,19 +44,20 @@ uniform int pointLightCount;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
-
 uniform sampler2D theTexture;
 uniform sampler2D directionalShadowMap;
+uniform sampler2D normalMap;
 
 uniform Material material;
 uniform bool shouldUseTexture;
+uniform bool shouldUseNormalMap;
 
 uniform vec3 eyePosition;
 
 float CalcDirectionalShadowFactor()
 {
 	vec3 projCoords = DirectionalLightSpacePos.xyz / DirectionalLightSpacePos.w;
-	projCoords = (projCoords * 0.5) + 0.5;
+	projCoords = (projCoords * 0.5) + 0.5; // Scale between 0 and 1 from -1 and 1
 	
 	//float closest = texture(directionalShadowMap, projCoords.xy).r;
 	float current = projCoords.z;
@@ -90,7 +92,16 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 {
 	vec4 ambientColour = vec4(light.colour, 1.0f) * light.ambientIntensity;
 	
-	float diffuseFactor = max(dot(normalize(Normal), normalize(direction)), 0.0f);
+	// Normal mapping
+	vec3 normal = normalize(Normal);
+	if (!shouldUseNormalMap)
+	{
+		// obtain normal from normal map in range [0,1]
+		normal = normalize(texture(normalMap, TexCoord).rgb*2.0 - 1.0);
+	}
+	vec3 lightDir = normalize(direction);
+	
+	float diffuseFactor = max(dot(normal, lightDir), 0.0f);
 	vec4 diffuseColour = vec4(light.colour * light.diffuseIntensity * diffuseFactor, 1.0f);
 	
 	vec4 specularColour = vec4(0, 0, 0, 0);
@@ -98,7 +109,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	if(diffuseFactor > 0.0f)
 	{
 		vec3 fragToEye = normalize(eyePosition - FragPos);
-		vec3 reflectedVertex = normalize(reflect(direction, normalize(Normal)));
+		vec3 reflectedVertex = normalize(reflect(lightDir, normal));
 		
 		float specularFactor = dot(fragToEye, reflectedVertex);
 		if(specularFactor > 0.0f)

@@ -23,7 +23,7 @@
 // Uniform
 GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
 uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0,
-uniformShouldUseTexture = 0;
+uniformShouldUseTexture = 0, uniformShouldUseNormalMap = 0;
 
 unsigned int pointLightCount = 0;
 
@@ -39,8 +39,11 @@ Shader directionalShadowShader;
 
 Camera camera;
 
-Texture woodTexture;
 Texture plainTexture;
+
+Texture brickDiffuse;
+Texture brickNormal;
+Texture brickDisplacement;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -134,7 +137,7 @@ void CreateObjects() {
 
 
 	GLfloat vertices[] = {
-		// Beep
+		// Frit
 		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //0
 		 1.0f, -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
 		-1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
@@ -214,13 +217,6 @@ void CreateObjects() {
 		20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
 	};
 
-	/*
-	-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, -1.0f, -1.0f, 1.0f,//BL
-	20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 1.0f, -1.0f, 1.0f,//BR
-	-20.f, 0.0f, 20.0f, 0.0f, 10.0f, -1.0f, -1.0f, -1.0f,//FL
-	20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 1.0f, -1.0f, -1.0f//FR
-*/
-
 
 	unsigned int floorIndices[] = {
 		0, 2, 1,
@@ -270,39 +266,42 @@ void RenderScene()
 	curAngle += 30.0f * deltaTime;
 	if (curAngle >= 360.0f) curAngle = 0.0f;
 
+	brickNormal.UseTexture(GL_TEXTURE2);
+
+	// CUBE
 	glm::mat4 model(1.0f); // Identity matrix
-	//model = glm::translate(model, glm::vec3(0.0f, 1.0f, -2.5f)); // Apply a translation matrix to the model matrix
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
 	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
 	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-
 	// Textures
 	glUniform1i(uniformShouldUseTexture, 1);
-	woodTexture.UseTexture();
+	glUniform1i(uniformShouldUseNormalMap, 1);
+	brickDiffuse.UseTexture(GL_TEXTURE0);
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 	meshList[0]->RenderMeshIndex();
 
-
+	// SUN
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
 	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-
 	glUniform1i(uniformShouldUseTexture, 0);
 	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 	meshList[1]->RenderMeshIndex();
 
+	// FLOOR
 	glUniform1i(uniformShouldUseTexture, 1);
+	glUniform1i(uniformShouldUseNormalMap, 0);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	plainTexture.UseTexture();
+	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+	plainTexture.UseTexture(GL_TEXTURE0);
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 	meshList[2]->RenderMeshIndex();
 }
@@ -356,6 +355,7 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
 	shaderList[0].SetTexture(0);
 	shaderList[0].SetDirectionalShadowMap(1);
+	shaderList[0].SetNormalMap(2);
 
 	RenderScene();
 }
@@ -370,11 +370,15 @@ int main()
 	// GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -10.0f, 5.0f, 0.05f);
 
-	woodTexture = Texture("Textures/brick.png");
-	woodTexture.LoadTexture();
-
 	plainTexture = Texture("Textures/plain.png");
 	plainTexture.LoadTexture();
+
+	brickDiffuse = Texture("Textures/brickwall.jpg");
+	brickDiffuse.LoadTexture();
+	brickNormal = Texture("Textures/brickwall_normal.jpg");
+	brickNormal.LoadTexture();
+	brickDisplacement = Texture("Textures/bricks2_disp.jpg");
+	brickDisplacement.LoadTexture();
 
 	shinyMaterial = Material(0.5, 128);
 	dullMaterial = Material(0.3f, 4);
@@ -390,6 +394,7 @@ int main()
 	uniformEyePosition = shaderList[0].GetEyePositionLocation();
 	uniformInverseTranspose = shaderList[0].GetInverseTransposeModelLocation();
 	uniformShouldUseTexture = shaderList[0].GetUniformShouldUseTextureLocation();
+	uniformShouldUseNormalMap = shaderList[0].GetUniformShouldUseNormalMapLocation();
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 

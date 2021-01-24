@@ -11,6 +11,7 @@ bool ShadowMap::init(GLuint width, GLuint height)
     shadowHeight = height;
     shadowWidth = width;
 
+    glCullFace(GL_FRONT);
     glGenFramebuffers(1, &FBO);
     glGenTextures(1, &shadowMap);
     glBindTexture(GL_TEXTURE_2D, shadowMap);
@@ -29,6 +30,8 @@ bool ShadowMap::init(GLuint width, GLuint height)
 
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+
+    glCullFace(GL_BACK);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
