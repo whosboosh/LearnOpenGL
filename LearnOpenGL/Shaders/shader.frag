@@ -62,8 +62,11 @@ float CalcDirectionalShadowFactor()
 	//float closest = texture(directionalShadowMap, projCoords.xy).r;
 	float current = projCoords.z;
 	
+	vec3 direction = directionalLight.direction;
+	direction.y = -direction.y;
+	
 	vec3 normal = normalize(Normal);
-	vec3 lightDir = normalize(directionalLight.direction);
+	vec3 lightDir = normalize(direction);
 	
 	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.0005);
 	
@@ -94,7 +97,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	
 	// Normal mapping
 	vec3 normal = normalize(Normal);
-	if (!shouldUseNormalMap)
+	if (shouldUseNormalMap)
 	{
 		// obtain normal from normal map in range [0,1]
 		normal = normalize(texture(normalMap, TexCoord).rgb*2.0 - 1.0);
@@ -122,10 +125,33 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	return (ambientColour + (1.0 - shadowFactor) * (diffuseColour + specularColour));
 }
 
+vec4 CalcPhong(Light light, vec3 direction, float shadowFactor)
+{
+	// Ambient
+    vec4 ambient = light.ambientIntensity * vec4(light.colour, 1.0);
+	
+	vec3 norm = normalize(Normal);
+	if (shouldUseNormalMap)
+	{
+		norm = normalize(texture(normalMap, TexCoord).rgb*2.0 - 1.0);
+	}
+	
+	vec3 lightDir = normalize(direction - FragPos);
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec4 diffuse = vec4(diff * light.diffuseIntensity * light.colour, 1.0);
+	
+	vec3 viewDir = normalize(eyePosition - FragPos);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	vec4 specular = vec4(material.specularIntensity * spec * light.colour, 1.0);  
+	
+	return (ambient + (1.0 - shadowFactor) * (diffuse + specular));
+}
+
 vec4 CalcDirectionalLight()
 {
 	float shadowFactor = CalcDirectionalShadowFactor();
-	return CalcLightByDirection(directionalLight.base, directionalLight.direction, shadowFactor);
+	return CalcPhong(directionalLight.base, -directionalLight.direction, shadowFactor);
 }
 
 vec4 CalcPointLights()

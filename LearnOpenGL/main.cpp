@@ -28,7 +28,7 @@ uniformShouldUseTexture = 0, uniformShouldUseNormalMap = 0;
 unsigned int pointLightCount = 0;
 
 float xOffset = 0.0f;
-float yOffset = -6.0f;
+float yOffset = 6.0f;
 float zOffset = 0.0f;
 
 Window mainWindow;
@@ -278,14 +278,14 @@ void RenderScene()
 	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
 	// Textures
 	glUniform1i(uniformShouldUseTexture, 1);
-	glUniform1i(uniformShouldUseNormalMap, 1);
+	glUniform1i(uniformShouldUseNormalMap, 0);
 	brickDiffuse.UseTexture(GL_TEXTURE0);
 	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
 	meshList[0]->RenderMeshIndex();
 
 	// SUN
 	model = glm::mat4(1.0f); // Identity matrix
-	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
+	model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
