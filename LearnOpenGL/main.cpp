@@ -210,6 +210,18 @@ void CreateObjects() {
 	obj2->CreateMeshIndex(vertices2, indices2, (sizeof(vertices2) / sizeof(*vertices2)), numIndices);
 	meshList.push_back(obj2);
 
+	std::cout << vertices[5] << " " << vertices[6] << " " << vertices[7] << "\n";
+	std::cout << vertices[14] << " " << vertices[15] << " " << vertices[16] << "\n";
+	std::cout << vertices[22] << " " << vertices[23]<< " " << vertices[24] << "\n";
+	std::cout << vertices[30] << " " << vertices[31] << " " << vertices[32] << "\n";
+
+	std::cout << "RIGHT FACE" << "\n";
+
+	std::cout << vertices[38] << " " << vertices[39] << " " << vertices[40] << "\n";
+	std::cout << vertices[46] << " " << vertices[47] << " " << vertices[48] << "\n";
+	std::cout << vertices[54] << " " << vertices[55] << " " << vertices[56] << "\n";
+	std::cout << vertices[62] << " " << vertices[63] << " " << vertices[64] << "\n";
+
 	GLfloat floorVertices[] = {
 		-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
 		20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR

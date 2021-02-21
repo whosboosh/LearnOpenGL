@@ -94,7 +94,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	
 	// Normal mapping
 	vec3 normal = normalize(Normal);
-	if (!shouldUseNormalMap)
+	if (shouldUseNormalMap)
 	{
 		// obtain normal from normal map in range [0,1]
 		normal = normalize(texture(normalMap, TexCoord).rgb*2.0 - 1.0);
