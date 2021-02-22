@@ -1,6 +1,6 @@
 #version 330
 
-in vec3 vCol;
+in vec4 vCol;
 in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
@@ -158,6 +158,6 @@ void main()
 		colour = texture(theTexture, TexCoord) * finalColour;
 	}
 	else {
-		colour = vec4(vCol,1.0);
+		colour = vCol;
 	}
 }
