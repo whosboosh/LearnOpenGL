@@ -20,6 +20,7 @@
 #include "DirectionalLight.h"
 #include "Material.h"
 #include "GBuffer.h"
+#include "Utilities.h"
 
 unsigned int pointLightCount = 0;
 
@@ -64,108 +65,43 @@ float maxSize = 0.8f;
 float minSize = 0.1f;
 bool sizeDirection = false;
 
-void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices,
-	unsigned int verticeCount, unsigned int vLength, unsigned int normalOffset)
-{
-	// For each face in a mesh, ln0, ln1, ln2 correspond to each vertex of that face.
-	// We want to create two new vector 
-	for (size_t i = 0; i < indiceCount; i += 3)
-	{
-		unsigned int ln0 = indices[i] * vLength;
-		unsigned int ln1 = indices[i + 1] * vLength;
-		unsigned int ln2 = indices[i + 2] * vLength;
 
-		glm::vec3 v1(vertices[ln1] - vertices[ln0], vertices[ln1 + 1] - vertices[ln0 + 1], vertices[ln1 + 2] - vertices[ln0 + 2]);
-		glm::vec3 v2(vertices[ln2] - vertices[ln0], vertices[ln2 + 1] - vertices[ln0 + 1], vertices[ln2 + 2] - vertices[ln0 + 2]);
-		glm::vec3 normal = glm::cross(v1, v2);
-		normal = glm::normalize(normal);
-
-		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
-		vertices[ln0] += normal.x; vertices[ln0 + 1] += normal.y; vertices[ln0 + 2] += normal.z;
-		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
-		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
-	}
-	for (size_t i = 0; i < verticeCount / vLength; i++)
-	{
-		unsigned int nOffset = i * vLength + normalOffset;
-		glm::vec3 vec(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
-		vec = glm::normalize(vec);
-		vertices[nOffset] = vec.x; vertices[nOffset + 1] = vec.y; vertices[nOffset + 2] = vec.z;
-	}
-}
-
-void CalcNormals(GLfloat* vertices, unsigned int verticeCount, unsigned int normalOffset)
-{
-	for (int i = 0; i < verticeCount / 3; i++)
-	{
-		unsigned int ln0 = i * 24;
-		unsigned int ln1 = i * 24 + 8;
-		unsigned int ln2 = i * 24 + 16;
-
-		glm::vec3 v1(vertices[ln1] - vertices[ln0], vertices[ln1 + 1] - vertices[ln0 + 1], vertices[ln1 + 2] - vertices[ln0 + 2]);
-		glm::vec3 v2(vertices[ln2] - vertices[ln0], vertices[ln2 + 1] - vertices[ln0 + 1], vertices[ln2 + 2] - vertices[ln0 + 2]);
-		glm::vec3 normal = glm::cross(v1, v2);
-		normal = glm::normalize(normal);
-
-		ln0 += normalOffset; ln1 += normalOffset; ln2 += normalOffset;
-		vertices[ln0] += normal.x; vertices[ln0 + 1] += normal.y; vertices[ln0 + 2] += normal.z;
-		vertices[ln1] += normal.x; vertices[ln1 + 1] += normal.y; vertices[ln1 + 2] += normal.z;
-		vertices[ln2] += normal.x; vertices[ln2 + 1] += normal.y; vertices[ln2 + 2] += normal.z;
-	}
-}
 
 void CreateObjects() {
-	GLfloat oldVertices[] = {
-		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Front left up
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Front left down
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Front right up
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Front right down
+	std::vector<Vertex> vertices = {
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 0
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 
-		-1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Back left Up
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Back left down
-		1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, // Back right up
-		1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f  // Back right down
+
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 4
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 8
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 12
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }}, // 16
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 20
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-
-	GLfloat vertices[] = {
-		// Frit
-		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //0
-		 1.0f, -1.0f,  1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-
-		 // Right
-		 1.0f, -1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f, //4
-		 1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-
-		 // Back
-		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, //8
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-
-		// Left
-		-1.0f, -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //12
-		-1.0f, -1.0f,  1.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f,
-		-1.0f,  1.0f, -1.0f, 0.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-		-1.0f,  1.0f,  1.0f, 1.0f,  1.0f, 0.0f, 0.0f, 0.0f,
-
-		// Bottom
-		-1.0f, -1.0f, -1.0f,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f, //16
-		 1.0f, -1.0f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		-1.0f, -1.0f,  1.0f,  1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-
-		 // Top
-		-1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 0.0f, //20 /LF
-		 1.0f,  1.0f,  1.0f,  0.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RF
-		-1.0f,  1.0f, -1.0f,  1.0f,  0.0f, 0.0f, 0.0f, 0.0f, // LB
-		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RB
-	};
-	unsigned int indices[] = {
+	std::vector<uint32_t> indices = {
 		1,3,2, 2,0,1,  //Face front
 		4,7,6, 6,5,4, //Face right
 		10,8,9, 9,11,10, // Back
@@ -174,61 +110,46 @@ void CreateObjects() {
 		23,22,20, 20,21,23, // Top
 	};
 
-	GLfloat vertices2[] = {
-		//	x	   y      z     u     v   nx   ny   nz
-		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f,
+	std::vector<Vertex> vertices2 = {
+		{ { -1.0, -1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 0.0, -1.0, 1.0 }, {1.0, 1.0, 1.0 }, { 0.5, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 1.0, -1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 0.0, 1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.5, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-	unsigned int indices2[] = {
+	std::vector<uint32_t> indices2 = {
 		0,3,1,
 		1,2,3,
 		2,3,0,
 		0,1,2
 	};
 
-	int numIndices = sizeof(indices) / sizeof(*indices);
-	//CalcNormals(vertices, 12, 5);
-	calcAverageNormals(indices, numIndices, vertices, sizeof(vertices) / sizeof(*vertices), 8, 5);
-	Mesh* obj1 = new Mesh();
-	obj1->CreateMeshIndex(vertices, indices, sizeof(vertices) / sizeof(*vertices), numIndices);
-	meshList.push_back(obj1);
-
-	numIndices = sizeof(indices2) / sizeof(*indices2);
-	calcAverageNormals(indices2, numIndices, vertices2, 32, 8, 5);
-	Mesh* obj2 = new Mesh();
-	obj2->CreateMeshIndex(vertices2, indices2, (sizeof(vertices2) / sizeof(*vertices2)), numIndices);
-	meshList.push_back(obj2);
-
-	std::cout << vertices[5] << " " << vertices[6] << " " << vertices[7] << "\n";
-	std::cout << vertices[14] << " " << vertices[15] << " " << vertices[16] << "\n";
-	std::cout << vertices[22] << " " << vertices[23]<< " " << vertices[24] << "\n";
-	std::cout << vertices[30] << " " << vertices[31] << " " << vertices[32] << "\n";
-
-	std::cout << "RIGHT FACE" << "\n";
-
-	std::cout << vertices[38] << " " << vertices[39] << " " << vertices[40] << "\n";
-	std::cout << vertices[46] << " " << vertices[47] << " " << vertices[48] << "\n";
-	std::cout << vertices[54] << " " << vertices[55] << " " << vertices[56] << "\n";
-	std::cout << vertices[62] << " " << vertices[63] << " " << vertices[64] << "\n";
-
-	GLfloat floorVertices[] = {
-		-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
-		20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR
-		-20.f, 0.0f, 20.0f, 0.0f, 10.0f, 0.0f, -1.0f, 0.0f,//FL
-		20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
+	std::vector<Vertex> floorVertices = {
+		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
+		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
+		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
+		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
 	};
 
-
-	unsigned int floorIndices[] = {
+	std::vector<uint32_t> floorIndices = {
 		0, 2, 1,
 		1, 2, 3
 	};
 
+	calcAverageNormals(&indices, &vertices);
+	calcAverageNormals(&floorIndices, &floorVertices);
+	calcAverageNormals(&indices2, &vertices2);
+
+	Mesh* obj1 = new Mesh();
+	obj1->CreateMeshIndex(&vertices, &indices);
+	meshList.push_back(obj1);
+
+	Mesh* obj2 = new Mesh();
+	obj2->CreateMeshIndex(&vertices2, &indices2);
+	meshList.push_back(obj2);
+
 	Mesh* obj3 = new Mesh();
-	obj3->CreateMeshIndex(floorVertices, floorIndices, 32, 6);
+	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
 	meshList.push_back(obj3);
 }
 
