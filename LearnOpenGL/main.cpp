@@ -458,18 +458,18 @@ int main()
 
 		//=====================
 
-		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer#
+		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 		DirectionalShadowMapPass(&mainLight);
 		RenderLightPass();
 
 		
-			geometryFrameBuffer.ReadFrameBuffer();
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-			// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-			// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-			// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-			glBlitFramebuffer(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), 0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);	
+		geometryFrameBuffer.ReadFrameBuffer();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+		// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+		// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
+		// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+		glBlitFramebuffer(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), 0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);	
 		
 		
 
