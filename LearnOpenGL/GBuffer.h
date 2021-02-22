@@ -12,7 +12,8 @@ public:
 
 	void init();
 	void updateScreenSize(GLuint width, GLuint height);
-	void Write();
+	void BindFrameBuffer();
+	void ReadFrameBuffer();
 	void Read(GLenum textureUnit, char* type);
 
 	~GBuffer();

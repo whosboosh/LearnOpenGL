@@ -78,9 +78,14 @@ void GBuffer::updateScreenSize(GLuint width, GLuint height)
     screenWidth = width;
 }
 
-void GBuffer::Write()
+void GBuffer::BindFrameBuffer()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+}
+
+void GBuffer::ReadFrameBuffer()
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
 }
 
 void GBuffer::Read(GLenum textureUnit, char* type)
