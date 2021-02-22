@@ -45,7 +45,7 @@ bool ShadowMap::init(GLuint width, GLuint height)
     return true;
 }
 
-void ShadowMap::Write()
+void ShadowMap::BindFrameBuffer()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 }

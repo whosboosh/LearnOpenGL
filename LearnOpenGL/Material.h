@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include "Shader.h"
 
 class Material
 {
@@ -7,7 +8,7 @@ public:
 	Material();
 	Material(GLfloat sIntensity, GLfloat shine);
 
-	void UseMaterial(GLuint specularIntensityLocation, GLuint shininessLocation);
+	void UseMaterial(Shader* shader);
 
 	~Material();
 private:

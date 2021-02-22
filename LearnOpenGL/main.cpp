@@ -19,11 +19,7 @@
 #include "PointLight.h"
 #include "DirectionalLight.h"
 #include "Material.h"
-
-// Uniform
-GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
-uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0,
-uniformShouldUseTexture = 0, uniformShouldUseNormalMap = 0;
+#include "GBuffer.h"
 
 unsigned int pointLightCount = 0;
 
@@ -60,17 +56,13 @@ float triIncrement = 0.5f;
 
 float curAngle = 0.0f;
 
-float deltaTime = 0.0f;
-float lastTime = 0.0f;
+double deltaTime = 0.0f;
+double lastTime = 0.0f;
 
 float curSize = 0.4f;
 float maxSize = 0.8f;
 float minSize = 0.1f;
 bool sizeDirection = false;
-
-// Shaders
-static const char* vShader = "Shaders/shader.vert";
-static const char* fShader = "Shaders/shader.frag";
 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices,
 	unsigned int verticeCount, unsigned int vLength, unsigned int normalOffset)
@@ -174,12 +166,12 @@ void CreateObjects() {
 		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RB
 	};
 	unsigned int indices[] = {
-		2,3,1, 1,0,2,  //Face front
-		6,7,4, 4,5,6, //Face right
-		9,8,10, 10,11,9, // Back
-		13,12,14, 14,15,13, // Left
-		19,17,16, 16,18,19, // Bottom
-		20,22,23, 23,21,20, // Top
+		1,3,2, 2,0,1,  //Face front
+		4,7,6, 6,5,4, //Face right
+		10,8,9, 9,11,10, // Back
+		14,12,13, 13,15,14, // Left
+		16,17,19, 19,18,16, // Bottom
+		23,22,20, 20,21,23, // Top
 	};
 
 	GLfloat vertices2[] = {
@@ -242,7 +234,8 @@ void CreateObjects() {
 
 void CreateShaders()
 {
-	geometryShader.CreateFromFiles("Shaders/shader.vert", "Shaders/shader.frag");
+	// Shaders
+	geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
 }
 
@@ -259,7 +252,7 @@ void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
 }
 
-void RenderScene()
+void RenderScene(Shader* shader)
 {
 	if (direction)
 	{
@@ -277,40 +270,39 @@ void RenderScene()
 	brickNormal.UseTexture(GL_TEXTURE2);
 
 	// CUBE
+	shader->setBool("shouldUseTexture", 1);
+	shader->setBool("shouldUseNormalMap", 1);
+	brickDiffuse.UseTexture(GL_TEXTURE0);
+	shinyMaterial.UseMaterial(shader);
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
 	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shader->setMat4("model", model);
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-	// Textures
-	glUniform1i(uniformShouldUseTexture, 1);
-	glUniform1i(uniformShouldUseNormalMap, 1);
-	brickDiffuse.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-	meshList[0]->RenderMeshIndex();
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+	meshList[0]->RenderMeshIndex(); // Render object
 
 	// SUN
+	shader->setBool("shouldUseTexture", 0);
+	shader->setBool("shouldUseNormalMap", 0);
+	dullMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-	glUniform1i(uniformShouldUseTexture, 0);
-	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	shader->setMat4("model", model);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[1]->RenderMeshIndex();
 
 	// FLOOR
-	glUniform1i(uniformShouldUseTexture, 1);
-	glUniform1i(uniformShouldUseNormalMap, 0);
+	shader->setBool("shouldUseTexture", 1);
+	shader->setBool("shouldUseNormalMap", 0);
+	plainTexture.UseTexture(GL_TEXTURE0);
+	shinyMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-	plainTexture.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	shader->setMat4("model", model);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex();
 }
 
@@ -320,52 +312,41 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
-	light->GetShadowMap()->Write();
+	// Calls glBindFrameBuffer(GL_FRAMEBUFFER, FBO) in ShadowMap
+	light->GetShadowMap()->BindFrameBuffer();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	uniformModel = directionalShadowShader.GetModelLocation();
-
 	glm::mat4 lightTransform = light->CalculateLightTransform();
-	directionalShadowShader.SetDirectionalLightTransform(&lightTransform);
+	directionalShadowShader.setMat4("directionalLightTransform", lightTransform);
 
-	RenderScene();
+	RenderScene(&directionalShadowShader);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
-	geometryShader.UseShader();
+	geometryShader.UseShader(); 
 
 	glViewport(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
 
-	// Clear window
-	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	geometryShader.setMat4("projection", projectionMatrix);
+	geometryShader.setMat4("view", viewMatrix);
+	geometryShader.setVec3("eyePosition", glm::vec3(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z));
+	geometryShader.setInt("theTexture", 0); //GL_TEXTURE0
 
-	uniformModel = geometryShader.GetModelLocation();
-
-	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
-
-	ComputePositionOffsets(xOffset, zOffset);
-	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
-	mainLight.UpdatePosition(xOffset, yOffset, zOffset);
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
+	geometryShader.setInt("directionalShadowMap", 1);
+	geometryShader.setInt("normalMap", 2);
 
 	geometryShader.SetDirectionalLight(&mainLight);
 	geometryShader.SetPointLights(pointLights, pointLightCount);
 
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
-	geometryShader.SetDirectionalLightTransform(&lightTransform);
+	geometryShader.setMat4("directionalLightTransform", lightTransform);
 
-	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
-	geometryShader.SetTexture(0);
-	geometryShader.SetDirectionalShadowMap(1);
-	geometryShader.SetNormalMap(2);
 
-	RenderScene();
+	RenderScene(&geometryShader);
 }
 
 int main()
@@ -394,16 +375,6 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	uniformProjection = geometryShader.GetProjectionLocation();
-	uniformModel = geometryShader.GetModelLocation();
-	uniformView = geometryShader.GetViewLocation();
-	uniformSpecularIntensity = geometryShader.GetSpecularIntensityLocation();
-	uniformSpecularShininess = geometryShader.GetSpecularShininessLocation();
-	uniformEyePosition = geometryShader.GetEyePositionLocation();
-	uniformInverseTranspose = geometryShader.GetInverseTransposeModelLocation();
-	uniformShouldUseTexture = geometryShader.GetUniformShouldUseTextureLocation();
-	uniformShouldUseNormalMap = geometryShader.GetUniformShouldUseNormalMapLocation();
-
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
 
@@ -425,7 +396,7 @@ int main()
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
 		// Delta time for synchronising events
-		float now = glfwGetTime();
+		double now = glfwGetTime();
 		deltaTime = now - lastTime;
 		lastTime = now;
 
@@ -435,8 +406,16 @@ int main()
 		camera.keyControl(mainWindow.getKeys(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
+		// Clear window
+		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ComputePositionOffsets(xOffset, zOffset);
+		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
+		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
+
 		DirectionalShadowMapPass(&mainLight);
-		RenderPass(projection, camera.calculateViewMatrix());
+		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 
 		glUseProgram(0);
 

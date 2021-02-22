@@ -24,28 +24,23 @@ public:
 
 	std::string ReadFile(const char* fileLocation);
 
-	GLuint GetProjectionLocation();
-	GLuint GetModelLocation();
-	GLuint GetViewLocation();
-	GLuint GetAmbientIntensityLocation();
-	GLuint GetAmbientColourLocation();
-	GLuint GetDiffuseIntensityLocation();
-	GLuint GetDirectionLocation();
-	GLuint GetSpecularIntensityLocation();
-	GLuint GetSpecularShininessLocation();
-	GLuint GetEyePositionLocation();
-	GLuint GetInverseTransposeModelLocation();
-	GLuint GetUniformShouldUseTextureLocation();
-	GLuint GetUniformNormalMapLocation();
-	GLuint GetUniformShouldUseNormalMapLocation();
 
 	void SetDirectionalLight(DirectionalLight *dLight);
 	void SetPointLights(PointLight* pLight, unsigned int lightCount);
 
-	void SetTexture(GLuint textureUnit);
-	void SetDirectionalLightTransform(glm::mat4* lTransform);
-	void SetDirectionalShadowMap(GLuint textureUnit);
-	void SetNormalMap(GLuint textureUnit);
+	void setBool(const std::string& name, bool value);
+	void setInt(const std::string& name, int value);
+	void setFloat(const std::string& name, float value);
+	void setVec2(const std::string& name, const glm::vec2& value);
+	void setVec2(const std::string& name, float x, float y);
+	void setVec3(const std::string& name, const glm::vec3& value);
+	void setVec3(const std::string& name, float x, float y, float z);
+	void setVec4(const std::string& name, const glm::vec4& value);
+	void setVec4(const std::string& name, float x, float y, float z, float w);
+	void setMat2(const std::string& name, const glm::mat2& mat);
+	void setMat3(const std::string& name, const glm::mat3& mat);
+	void setMat4(const std::string& name, const glm::mat4& mat);
+
 
 	void UseShader();
 	void ClearShader();
@@ -55,9 +50,7 @@ public:
 private:
 	GLuint uniformPointLightCount;
 
-	GLuint shaderID, uniformProjection, uniformModel, uniformView,
-		uniformSpecularIntensity, uniformSpecularShininess, uniformEyePosition, uniformInverseTranspose,
-		uniformShouldUseTexture, uniformDirectionalLightTransform, uniformDirectionalShadowMap, uniformTexture, uniformNormalMap, uniformShouldUseNormalMap;
+	GLuint shaderID;
 
 	struct {
 		GLuint uniformColour;
