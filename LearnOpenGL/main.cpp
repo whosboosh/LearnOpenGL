@@ -32,10 +32,6 @@ std::vector<Mesh*> meshList;
 
 Shader geometryShader;
 Shader directionalShadowShader;
-Shader lightingPassShader;
-Shader lightBoxShader;
-
-GBuffer geometryFrameBuffer;
 
 Camera camera;
 
@@ -170,12 +166,12 @@ void CreateObjects() {
 		 1.0f,  1.0f, -1.0f,  1.0f,  1.0f, 0.0f, 0.0f, 0.0f, // RB
 	};
 	unsigned int indices[] = {
-		2,3,1, 1,0,2,  //Face front
-		6,7,4, 4,5,6, //Face right
-		9,8,10, 10,11,9, // Back
-		13,12,14, 14,15,13, // Left
-		19,17,16, 16,18,19, // Bottom
-		20,22,23, 23,21,20, // Top
+		1,3,2, 2,0,1,  //Face front
+		4,7,6, 6,5,4, //Face right
+		10,8,9, 9,11,10, // Back
+		14,12,13, 13,15,14, // Left
+		16,17,19, 19,18,16, // Bottom
+		23,22,20, 20,21,23, // Top
 	};
 
 	GLfloat vertices2[] = {
@@ -241,8 +237,6 @@ void CreateShaders()
 	// Shaders
 	geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
-	lightingPassShader.CreateFromFiles("Shaders/deferred_shading.vert", "Shaders/deferred_shading.frag");
-	lightBoxShader.CreateFromFiles("Shaders/light_box.vert", "Shaders/light_box.frag");
 }
 
 void ComputePositionOffsets(float& fXOffset, float& fZOffset)
@@ -273,12 +267,12 @@ void RenderScene(Shader* shader)
 	curAngle += 30.0f * deltaTime;
 	if (curAngle >= 360.0f) curAngle = 0.0f;
 
-	brickNormal.UseTexture(GL_TEXTURE3);
+	brickNormal.UseTexture(GL_TEXTURE2);
 
 	// CUBE
 	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 1);
-	brickDiffuse.UseTexture(GL_TEXTURE3);
+	brickDiffuse.UseTexture(GL_TEXTURE0);
 	shinyMaterial.UseMaterial(shader);
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
@@ -303,7 +297,7 @@ void RenderScene(Shader* shader)
 	// FLOOR
 	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 0);
-	plainTexture.UseTexture(GL_TEXTURE3);
+	plainTexture.UseTexture(GL_TEXTURE0);
 	shinyMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
@@ -330,56 +324,29 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
-void RenderLightBox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
-	lightBoxShader.UseShader();
+	geometryShader.UseShader(); 
 
-	lightBoxShader.setMat4("projection", projectionMatrix);
-	lightBoxShader.setMat4("view", viewMatrix);
+	glViewport(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
 
-	RenderScene(&lightBoxShader);
-}
+	geometryShader.setMat4("projection", projectionMatrix);
+	geometryShader.setMat4("view", viewMatrix);
+	geometryShader.setVec3("eyePosition", glm::vec3(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z));
+	geometryShader.setInt("theTexture", 0); //GL_TEXTURE0
 
-void RenderLightPass()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	lightingPassShader.UseShader();
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
+	geometryShader.setInt("directionalShadowMap", 1);
+	geometryShader.setInt("normalMap", 2);
 
-	char gPositionStr[] = "gPosition";
-	geometryFrameBuffer.Read(GL_TEXTURE0, gPositionStr);
-	char gNormalStr[] = "gNormal";
-	geometryFrameBuffer.Read(GL_TEXTURE1, gNormalStr);
-	char gAlbedoSpec[] = "gAlbedoSpec";
-	geometryFrameBuffer.Read(GL_TEXTURE2, gAlbedoSpec);
-
-	mainLight.GetShadowMap()->Read(GL_TEXTURE4); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
-	
-	lightingPassShader.setInt("directionalShadowMap", 4);
-	lightingPassShader.setInt("normalMap", 5);
-
-	lightingPassShader.SetDirectionalLight(&mainLight);
-	lightingPassShader.SetPointLights(pointLights, pointLightCount);
-	lightingPassShader.setVec3("eyePosition", glm::vec3(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z));
+	geometryShader.SetDirectionalLight(&mainLight);
+	geometryShader.SetPointLights(pointLights, pointLightCount);
 
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
 	geometryShader.setMat4("directionalLightTransform", lightTransform);
 
-	RenderScene(&lightingPassShader);
-}
-
-void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
-{
-	geometryFrameBuffer.BindFrameBuffer(); // glBindFrameBuffer(GL_FRAMEBUFFER, gBuffer);
-	geometryShader.UseShader(); 
-
-	geometryShader.setMat4("projection", projectionMatrix);
-	geometryShader.setMat4("view", viewMatrix);
-	geometryShader.setInt("theTexture", 3); //GL_TEXTURE3
 
 	RenderScene(&geometryShader);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int main()
@@ -426,15 +393,6 @@ int main()
 		0.3f, 0.1f, 0.1f);
 	pointLightCount++;
 
-	geometryFrameBuffer = GBuffer(mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
-	geometryFrameBuffer.init();
-
-	lightingPassShader.UseShader();
-	lightingPassShader.setInt("gPosition", 0);
-	lightingPassShader.setInt("gNormal", 1);
-	lightingPassShader.setInt("gAlbedoSpec", 2);
-
-
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
 		// Delta time for synchronising events
@@ -456,28 +414,8 @@ int main()
 		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
 		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
 
-		//=====================
-
-		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 		DirectionalShadowMapPass(&mainLight);
-		RenderLightPass();
-
-		
-		geometryFrameBuffer.ReadFrameBuffer();
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-		// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-		// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-		// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-		glBlitFramebuffer(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), 0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);	
-		
-		
-
-
-		RenderLightBox(projection, camera.calculateViewMatrix());
-
-		//=====================
-
+		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 
 		glUseProgram(0);
 
