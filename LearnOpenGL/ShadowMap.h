@@ -9,7 +9,7 @@ public:
 	ShadowMap();
 
 	virtual bool init(GLuint width, GLuint height);
-	virtual void Write();
+	virtual void BindFrameBuffer();
 	virtual void Read(GLenum textureUnit);
 	GLuint GetShadowWidth() { return shadowWidth; }
 	GLuint GetShadowHeight() { return shadowHeight; }

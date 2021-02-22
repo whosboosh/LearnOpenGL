@@ -276,6 +276,10 @@ void RenderScene(Shader* shader)
 	brickNormal.UseTexture(GL_TEXTURE3);
 
 	// CUBE
+	shader->setBool("shouldUseTexture", 1);
+	shader->setBool("shouldUseNormalMap", 1);
+	brickDiffuse.UseTexture(GL_TEXTURE3);
+	shinyMaterial.UseMaterial(shader);
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
 	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -283,34 +287,28 @@ void RenderScene(Shader* shader)
 	shader->setMat4("model", model);
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-
-	// Textures
-	shader->setInt("shouldUseTexture", 1);
-	shader->setInt("shouldUseNormalMap", 1);
-	brickDiffuse.UseTexture(GL_TEXTURE3);
-	shinyMaterial.UseMaterial(shader);
 	meshList[0]->RenderMeshIndex(); // Render object
 
 	// SUN
+	shader->setBool("shouldUseTexture", 0);
+	shader->setBool("shouldUseNormalMap", 0);
+	dullMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	shader->setMat4("model", model);
-	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-	shader->setInt("shouldUseTexture", 0);
-	dullMaterial.UseMaterial(shader);
 	meshList[1]->RenderMeshIndex();
 
 	// FLOOR
-	shader->setInt("shouldUseTexture", 1);
-	shader->setInt("shouldUseNormalMap", 0);
-	model = glm::mat4(1.0f); // Identity matrix
-	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-	shader->setInt("shouldUseTexture", 0);
+	shader->setBool("shouldUseTexture", 1);
+	shader->setBool("shouldUseNormalMap", 0);
 	plainTexture.UseTexture(GL_TEXTURE3);
 	shinyMaterial.UseMaterial(shader);
+	model = glm::mat4(1.0f); // Identity matrix
+	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+	shader->setMat4("model", model);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex();
 }
 
@@ -321,7 +319,7 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
 	// Calls glBindFrameBuffer(GL_FRAMEBUFFER, FBO) in ShadowMap
-	light->GetShadowMap()->Write();
+	light->GetShadowMap()->BindFrameBuffer();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 lightTransform = light->CalculateLightTransform();
@@ -354,6 +352,8 @@ void RenderLightPass()
 	geometryFrameBuffer.Read(GL_TEXTURE1, gNormalStr);
 	char gAlbedoSpec[] = "gAlbedoSpec";
 	geometryFrameBuffer.Read(GL_TEXTURE2, gAlbedoSpec);
+
+	mainLight.GetShadowMap()->Read(GL_TEXTURE4); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
 	
 	lightingPassShader.setInt("directionalShadowMap", 4);
 	lightingPassShader.setInt("normalMap", 5);
@@ -375,8 +375,7 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 
 	geometryShader.setMat4("projection", projectionMatrix);
 	geometryShader.setMat4("view", viewMatrix);
-	mainLight.GetShadowMap()->Read(GL_TEXTURE4); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
-	geometryShader.setInt("theTexture", 2);
+	geometryShader.setInt("theTexture", 3); //GL_TEXTURE3
 
 	RenderScene(&geometryShader);
 
@@ -458,19 +457,25 @@ int main()
 		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
 
 		//=====================
+
 		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer#
 		DirectionalShadowMapPass(&mainLight);
 		RenderLightPass();
 
-		geometryFrameBuffer.ReadFrameBuffer();
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-		// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
-		// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
-		// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
-		glBlitFramebuffer(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), 0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+			geometryFrameBuffer.ReadFrameBuffer();
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+			// blit to default framebuffer. Note that this may or may not work as the internal formats of both the FBO and default framebuffer have to match.
+			// the internal formats are implementation defined. This works on all of my systems, but if it doesn't on yours you'll likely have to write to the 		
+			// depth buffer in another shader stage (or somehow see to match the default framebuffer's internal format with the FBO's internal format).
+			glBlitFramebuffer(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), 0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);	
+		
+		
+
 
 		RenderLightBox(projection, camera.calculateViewMatrix());
+
 		//=====================
 
 
