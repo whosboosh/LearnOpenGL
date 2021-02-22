@@ -101,13 +101,13 @@ void CreateObjects() {
 			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-	std::vector<uint32_t> indices = {
-		1,3,2, 2,0,1,  //Face front
-		4,7,6, 6,5,4, //Face right
-		10,8,9, 9,11,10, // Back
-		14,12,13, 13,15,14, // Left
-		16,17,19, 19,18,16, // Bottom
-		23,22,20, 20,21,23, // Top
+	unsigned int indices[] = {
+		2,3,1, 1,0,2,  //Face front
+		6,7,4, 4,5,6, //Face right
+		9,8,10, 10,11,9, // Back
+		13,12,14, 14,15,13, // Left
+		19,17,16, 16,18,19, // Bottom
+		20,22,23, 23,21,20, // Top
 	};
 
 	std::vector<Vertex> vertices2 = {
@@ -117,12 +117,13 @@ void CreateObjects() {
 		{ { 0.0, 1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.5, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-	std::vector<uint32_t> indices2 = {
+	unsigned int indices2[] = {
 		0,3,1,
 		1,2,3,
 		2,3,0,
 		0,1,2
 	};
+
 
 	std::vector<Vertex> floorVertices = {
 		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
@@ -131,25 +132,25 @@ void CreateObjects() {
 		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
 	};
 
-	std::vector<uint32_t> floorIndices = {
+	unsigned int floorIndices[] = {
 		0, 2, 1,
 		1, 2, 3
 	};
 
-	calcAverageNormals(&indices, &vertices);
-	calcAverageNormals(&floorIndices, &floorVertices);
-	calcAverageNormals(&indices2, &vertices2);
+	calcAverageNormals(indices, &vertices);
+	calcAverageNormals(floorIndices, &floorVertices);
+	calcAverageNormals(indices2, &vertices2);
 
 	Mesh* obj1 = new Mesh();
-	obj1->CreateMeshIndex(&vertices, &indices);
+	obj1->CreateMeshIndex(&vertices, indices, sizeof(indices) / sizeof(*indices));
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh();
-	obj2->CreateMeshIndex(&vertices2, &indices2);
+	obj2->CreateMeshIndex(&vertices2, indices2, sizeof(indices2) / sizeof(*indices2));
 	meshList.push_back(obj2);
 
 	Mesh* obj3 = new Mesh();
-	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
+	obj3->CreateMeshIndex(&floorVertices, floorIndices, sizeof(floorIndices) / sizeof(*floorIndices));
 	meshList.push_back(obj3);
 }
 

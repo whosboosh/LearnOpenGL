@@ -9,7 +9,7 @@ class Mesh
 public:
 	Mesh();
 	void CreateMesh(GLfloat *vertices, unsigned int numOfVertices);
-	void CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* numOfIndices);
+	void CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices);
 	void RenderMesh();
 	void RenderMeshIndex();
 	void ClearMesh();
@@ -17,5 +17,6 @@ public:
 private:
 	GLuint VAO, VBO, IBO;
 	GLsizei indexCount;
+	GLsizei verticeCount;
 };
 

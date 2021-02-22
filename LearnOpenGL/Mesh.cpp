@@ -6,11 +6,13 @@ Mesh::Mesh()
 	VBO = 0;
 	IBO = 0;
 	indexCount = 0;
+	verticeCount = 0;
 }
 
-void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
+void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices)
 {
-	indexCount = sizeof(*indices) / sizeof(indices);
+	indexCount = numOfIndices;
+	verticeCount = vertices->size();
 
 	std::cout << (void*)offsetof(Vertex, col)<<"\n";
 
@@ -19,11 +21,11 @@ void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>*
 
 	glGenBuffers(1, &IBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices, GL_STATIC_DRAW);
 	
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices->size(), &vertices[0], GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glEnableVertexAttribArray(0);
@@ -72,7 +74,7 @@ void Mesh::RenderMeshIndex()
 void Mesh::RenderMesh()
 {
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawArrays(GL_TRIANGLES, 0, verticeCount);
 	glBindVertexArray(0);
 }
 
