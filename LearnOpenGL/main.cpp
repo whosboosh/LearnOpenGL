@@ -33,9 +33,11 @@ float zOffset = 0.0f;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
-std::vector<Shader> shaderList;
 
+std::vector<Shader> shaderList;
 Shader directionalShadowShader;
+Shader lightingPassShader;
+Shader lightBoxShader;
 
 Camera camera;
 
@@ -67,10 +69,6 @@ float curSize = 0.4f;
 float maxSize = 0.8f;
 float minSize = 0.1f;
 bool sizeDirection = false;
-
-// Shaders
-static const char* vShader = "Shaders/shader.vert";
-static const char* fShader = "Shaders/shader.frag";
 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices,
 	unsigned int verticeCount, unsigned int vLength, unsigned int normalOffset)
@@ -242,12 +240,17 @@ void CreateObjects() {
 
 void CreateShaders()
 {
+	// Shaders
+	static const char* vShader = "Shaders/geometry_shader.vert";
+	static const char* fShader = "Shaders/geometry_shader.frag";
 	Shader* shader1 = new Shader();
 
 	shader1->CreateFromFiles(vShader, fShader);
 	shaderList.push_back(*shader1);
 
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
+	lightingPassShader.CreateFromFiles("Shaders/deferred_shading.vert", "Shaders/deferred_shading.frag");
+	lightBoxShader.CreateFromFiles("Shaders/light_box.vert", "Shaders/light_box.frag");
 }
 
 void ComputePositionOffsets(float& fXOffset, float& fZOffset)
@@ -324,6 +327,7 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 
 	glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
 
+	// Calls glBindFrameBuffer(GL_FRAMEBUFFER, FBO) in ShadowMap
 	light->GetShadowMap()->Write();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -364,7 +368,7 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
 	shaderList[0].SetDirectionalLightTransform(&lightTransform);
 
-	mainLight.GetShadowMap()->Read(GL_TEXTURE1);
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
 	shaderList[0].SetTexture(0);
 	shaderList[0].SetDirectionalShadowMap(1);
 	shaderList[0].SetNormalMap(2);

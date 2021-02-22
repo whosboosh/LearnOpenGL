@@ -46,6 +46,9 @@ public:
 	void SetDirectionalLightTransform(glm::mat4* lTransform);
 	void SetDirectionalShadowMap(GLuint textureUnit);
 	void SetNormalMap(GLuint textureUnit);
+	void SetGPosition(GLuint textureUnit);
+	void SetGNormal(GLuint textureUnit);
+	void SetGAlbedo(GLuint textureUnit);
 
 	void UseShader();
 	void ClearShader();
@@ -57,7 +60,8 @@ private:
 
 	GLuint shaderID, uniformProjection, uniformModel, uniformView,
 		uniformSpecularIntensity, uniformSpecularShininess, uniformEyePosition, uniformInverseTranspose,
-		uniformShouldUseTexture, uniformDirectionalLightTransform, uniformDirectionalShadowMap, uniformTexture, uniformNormalMap, uniformShouldUseNormalMap;
+		uniformShouldUseTexture, uniformDirectionalLightTransform, uniformDirectionalShadowMap,
+		uniformTexture, uniformNormalMap, uniformShouldUseNormalMap, uniformGPosition, uniformGAlbedoSpec, uniformGNormal;
 
 	struct {
 		GLuint uniformColour;

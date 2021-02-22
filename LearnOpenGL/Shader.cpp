@@ -124,6 +124,10 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 	uniformDirectionalLightTransform = glGetUniformLocation(shaderID, "directionalLightTransform");
 	uniformDirectionalShadowMap = glGetUniformLocation(shaderID, "directionalShadowMap");
 	uniformNormalMap = glGetUniformLocation(shaderID, "normalMap");
+
+	uniformGPosition = glGetUniformLocation(shaderID, "gPosition");
+	uniformGNormal = glGetUniformLocation(shaderID, "gNormal");
+	uniformGAlbedoSpec = glGetUniformLocation(shaderID, "gAlbedoSpec");
 }
 
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -240,14 +244,15 @@ void Shader::SetPointLights(PointLight* pLight, unsigned int lightCount)
 	}
 }
 
-void Shader::SetTexture(GLuint textureUnit)
-{
-	glUniform1i(uniformTexture, textureUnit);
-}
 
 void Shader::SetDirectionalLightTransform(glm::mat4* lTransform)
 {
 	glUniformMatrix4fv(uniformDirectionalLightTransform, 1, GL_FALSE, glm::value_ptr(*lTransform));
+}
+
+void Shader::SetTexture(GLuint textureUnit)
+{
+	glUniform1i(uniformTexture, textureUnit);
 }
 
 void Shader::SetDirectionalShadowMap(GLuint textureUnit)
@@ -258,6 +263,21 @@ void Shader::SetDirectionalShadowMap(GLuint textureUnit)
 void Shader::SetNormalMap(GLuint textureUnit)
 {
 	glUniform1i(uniformNormalMap, textureUnit);
+}
+
+void Shader::SetGAlbedo(GLuint textureUnit)
+{
+	glUniform1i(uniformGAlbedoSpec, textureUnit);
+}
+
+void Shader::SetGPosition(GLuint textureUnit)
+{
+	glUniform1i(uniformGPosition, textureUnit);
+}
+
+void Shader::SetGNormal(GLuint textureUnit)
+{
+	glUniform1i(uniformGNormal, textureUnit);
 }
 
 void Shader::UseShader()
