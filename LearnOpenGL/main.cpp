@@ -339,6 +339,19 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 }
 
 
+void RenderLightBox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+{
+	lightBoxShader.UseShader();
+	uniformModel = lightBoxShader.GetModelLocation();
+	uniformProjection = lightBoxShader.GetProjectionLocation();
+	uniformView = lightBoxShader.GetViewLocation();
+
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+	RenderScene();
+}
+
 void RenderLightPass()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -370,6 +383,9 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	geometryShader.UseShader(); 
 
 	uniformModel = geometryShader.GetModelLocation();
+	uniformProjection = geometryShader.GetProjectionLocation();
+	uniformView = geometryShader.GetViewLocation();
+
 	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
@@ -468,6 +484,7 @@ int main()
 		DirectionalShadowMapPass(&mainLight);
 		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 		//RenderLightPass();
+		//RenderLightBox(projection, camera.calculateViewMatrix());
 
 		glUseProgram(0);
 

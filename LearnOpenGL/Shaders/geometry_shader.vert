@@ -5,8 +5,8 @@ layout (location = 1) in vec2 tex;
 layout (location = 2) in vec3 norm;
 
 out vec2 TexCoord;
-out vec3 Normal;
 out vec3 FragPos;
+out vec3 Normal;
 out vec3 vCol;
 
 uniform mat4 model;

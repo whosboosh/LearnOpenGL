@@ -1,5 +1,4 @@
 #version 330
-out vec4 FragColor;
 
 layout(location = 0) out vec3 gPosition;
 layout(location = 1) out vec3 gNormal;
