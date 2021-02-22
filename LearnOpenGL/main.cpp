@@ -21,11 +21,6 @@
 #include "Material.h"
 #include "GBuffer.h"
 
-// Uniform
-GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
-uniformSpecularIntensity = 0, uniformSpecularShininess = 0, uniformEyePosition = 0, uniformInverseTranspose = 0,
-uniformShouldUseTexture = 0, uniformShouldUseNormalMap = 0;
-
 unsigned int pointLightCount = 0;
 
 float xOffset = 0.0f;
@@ -65,8 +60,8 @@ float triIncrement = 0.5f;
 
 float curAngle = 0.0f;
 
-float deltaTime = 0.0f;
-float lastTime = 0.0f;
+double deltaTime = 0.0f;
+double lastTime = 0.0f;
 
 float curSize = 0.4f;
 float maxSize = 0.8f;
@@ -263,7 +258,7 @@ void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
 }
 
-void RenderScene()
+void RenderScene(Shader* shader)
 {
 	if (direction)
 	{
@@ -278,43 +273,44 @@ void RenderScene()
 	curAngle += 30.0f * deltaTime;
 	if (curAngle >= 360.0f) curAngle = 0.0f;
 
-	brickNormal.UseTexture(GL_TEXTURE2);
+	brickNormal.UseTexture(GL_TEXTURE3);
 
 	// CUBE
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
 	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 1.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shader->setMat4("model", model);
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+
 	// Textures
-	glUniform1i(uniformShouldUseTexture, 1);
-	glUniform1i(uniformShouldUseNormalMap, 1);
-	brickDiffuse.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
-	meshList[0]->RenderMeshIndex();
+	shader->setInt("shouldUseTexture", 1);
+	shader->setInt("shouldUseNormalMap", 1);
+	brickDiffuse.UseTexture(GL_TEXTURE3);
+	shinyMaterial.UseMaterial(shader);
+	meshList[0]->RenderMeshIndex(); // Render object
 
 	// SUN
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+	shader->setMat4("model", model);
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-	glUniform1i(uniformShouldUseTexture, 0);
-	dullMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+	shader->setInt("shouldUseTexture", 0);
+	dullMaterial.UseMaterial(shader);
 	meshList[1]->RenderMeshIndex();
 
 	// FLOOR
-	glUniform1i(uniformShouldUseTexture, 1);
-	glUniform1i(uniformShouldUseNormalMap, 0);
+	shader->setInt("shouldUseTexture", 1);
+	shader->setInt("shouldUseNormalMap", 0);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(uniformInverseTranspose, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(model))));
-	plainTexture.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformSpecularShininess);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+	shader->setInt("shouldUseTexture", 0);
+	plainTexture.UseTexture(GL_TEXTURE3);
+	shinyMaterial.UseMaterial(shader);
 	meshList[2]->RenderMeshIndex();
 }
 
@@ -328,12 +324,10 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 	light->GetShadowMap()->Write();
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	uniformModel = directionalShadowShader.GetModelLocation();
-
 	glm::mat4 lightTransform = light->CalculateLightTransform();
-	directionalShadowShader.SetDirectionalLightTransform(&lightTransform);
+	directionalShadowShader.setMat4("directionalLightTransform", lightTransform);
 
-	RenderScene();
+	RenderScene(&directionalShadowShader);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -342,14 +336,11 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 void RenderLightBox(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 {
 	lightBoxShader.UseShader();
-	uniformModel = lightBoxShader.GetModelLocation();
-	uniformProjection = lightBoxShader.GetProjectionLocation();
-	uniformView = lightBoxShader.GetViewLocation();
 
-	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	lightBoxShader.setMat4("projection", projectionMatrix);
+	lightBoxShader.setMat4("view", viewMatrix);
 
-	RenderScene();
+	RenderScene(&lightBoxShader);
 }
 
 void RenderLightPass()
@@ -364,17 +355,17 @@ void RenderLightPass()
 	char gAlbedoSpec[] = "gAlbedoSpec";
 	geometryFrameBuffer.Read(GL_TEXTURE2, gAlbedoSpec);
 	
-	uniformModel = lightingPassShader.GetModelLocation();
-	lightingPassShader.SetDirectionalShadowMap(1);
-	lightingPassShader.SetNormalMap(2);
+	lightingPassShader.setInt("directionalShadowMap", 4);
+	lightingPassShader.setInt("normalMap", 5);
+
 	lightingPassShader.SetDirectionalLight(&mainLight);
 	lightingPassShader.SetPointLights(pointLights, pointLightCount);
-	glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+	lightingPassShader.setVec3("eyePosition", glm::vec3(camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z));
 
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
-	geometryShader.SetDirectionalLightTransform(&lightTransform);
+	geometryShader.setMat4("directionalLightTransform", lightTransform);
 
-	RenderScene();
+	RenderScene(&lightingPassShader);
 }
 
 void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
@@ -382,17 +373,12 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	geometryFrameBuffer.BindFrameBuffer(); // glBindFrameBuffer(GL_FRAMEBUFFER, gBuffer);
 	geometryShader.UseShader(); 
 
-	uniformModel = geometryShader.GetModelLocation();
-	uniformProjection = geometryShader.GetProjectionLocation();
-	uniformView = geometryShader.GetViewLocation();
+	geometryShader.setMat4("projection", projectionMatrix);
+	geometryShader.setMat4("view", viewMatrix);
+	mainLight.GetShadowMap()->Read(GL_TEXTURE4); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
+	geometryShader.setInt("theTexture", 2);
 
-	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-
-	mainLight.GetShadowMap()->Read(GL_TEXTURE1); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
-	geometryShader.SetTexture(0);
-
-	RenderScene();
+	RenderScene(&geometryShader);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -423,16 +409,6 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	uniformProjection = geometryShader.GetProjectionLocation();
-	uniformModel = geometryShader.GetModelLocation();
-	uniformView = geometryShader.GetViewLocation();
-	uniformSpecularIntensity = geometryShader.GetSpecularIntensityLocation();
-	uniformSpecularShininess = geometryShader.GetSpecularShininessLocation();
-	uniformEyePosition = geometryShader.GetEyePositionLocation();
-	uniformInverseTranspose = geometryShader.GetInverseTransposeModelLocation();
-	uniformShouldUseTexture = geometryShader.GetUniformShouldUseTextureLocation();
-	uniformShouldUseNormalMap = geometryShader.GetUniformShouldUseNormalMapLocation();
-
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
 
@@ -455,15 +431,15 @@ int main()
 	geometryFrameBuffer.init();
 
 	lightingPassShader.UseShader();
-	lightingPassShader.SetGPosition(0);
-	lightingPassShader.SetGNormal(1);
-	lightingPassShader.SetGAlbedo(2);
+	lightingPassShader.setInt("gPosition", 0);
+	lightingPassShader.setInt("gNormal", 1);
+	lightingPassShader.setInt("gAlbedoSpec", 2);
 
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
 		// Delta time for synchronising events
-		float now = glfwGetTime();
+		double now = glfwGetTime();
 		deltaTime = now - lastTime;
 		lastTime = now;
 

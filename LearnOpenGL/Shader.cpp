@@ -3,8 +3,6 @@
 Shader::Shader()
 {
 	shaderID = 0;
-	uniformModel = 0;
-	uniformProjection = 0;
 }
 
 void Shader::CreateFromString(const char* vertexCode, const char* fragmentCode)
@@ -77,21 +75,11 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 		return;
 	}
 
-	uniformProjection = glGetUniformLocation(shaderID, "projection");
-	uniformModel = glGetUniformLocation(shaderID, "model");
-	uniformView = glGetUniformLocation(shaderID, "view");
-
 	uniformDirectionalLight.uniformColour = glGetUniformLocation(shaderID, "directionalLight.base.colour");
 	uniformDirectionalLight.uniformAmbientIntensity = glGetUniformLocation(shaderID, "directionalLight.base.ambientIntensity");
 	uniformDirectionalLight.uniformDiffuseIntensity = glGetUniformLocation(shaderID, "directionalLight.base.diffuseIntensity");
 	uniformDirectionalLight.uniformDirection = glGetUniformLocation(shaderID, "directionalLight.direction");
 
-	uniformSpecularIntensity = glGetUniformLocation(shaderID, "material.specularIntensity");
-	uniformSpecularShininess = glGetUniformLocation(shaderID, "material.shininess");
-	uniformEyePosition = glGetUniformLocation(shaderID, "eyePosition");
-	uniformInverseTranspose = glGetUniformLocation(shaderID, "inverseTransposeModel");
-	uniformShouldUseTexture = glGetUniformLocation(shaderID, "shouldUseTexture");
-	uniformShouldUseNormalMap = glGetUniformLocation(shaderID, "shouldUseNormalMap");
 
 	uniformPointLightCount = glGetUniformLocation(shaderID, "pointLightCount");
 
@@ -119,15 +107,6 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 		snprintf(locBuff, sizeof(locBuff), "pointLights[%d].exponent", i);
 		uniformPointLight[i].uniformExponent = glGetUniformLocation(shaderID, locBuff);
 	}
-
-	uniformTexture = glGetUniformLocation(shaderID, "theTexture");
-	uniformDirectionalLightTransform = glGetUniformLocation(shaderID, "directionalLightTransform");
-	uniformDirectionalShadowMap = glGetUniformLocation(shaderID, "directionalShadowMap");
-	uniformNormalMap = glGetUniformLocation(shaderID, "normalMap");
-
-	uniformGPosition = glGetUniformLocation(shaderID, "gPosition");
-	uniformGNormal = glGetUniformLocation(shaderID, "gNormal");
-	uniformGAlbedoSpec = glGetUniformLocation(shaderID, "gAlbedoSpec");
 }
 
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
@@ -157,75 +136,6 @@ void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderT
 	glAttachShader(theProgram, theShader);
 }
 
-GLuint Shader::GetProjectionLocation()
-{
-	return uniformProjection;
-}
-GLuint Shader::GetModelLocation()
-{
-	return uniformModel;
-}
-
-GLuint Shader::GetViewLocation()
-{
-	return uniformView;
-}
-
-GLuint Shader::GetAmbientIntensityLocation()
-{
-	return uniformDirectionalLight.uniformAmbientIntensity;
-}
-
-GLuint Shader::GetAmbientColourLocation()
-{
-	return uniformDirectionalLight.uniformColour;
-}
-
-GLuint Shader::GetDiffuseIntensityLocation()
-{
-	return uniformDirectionalLight.uniformDiffuseIntensity;
-}
-
-GLuint Shader::GetDirectionLocation()
-{
-	return uniformDirectionalLight.uniformDirection;
-}
-
-GLuint Shader::GetSpecularIntensityLocation()
-{
-	return uniformSpecularIntensity;
-}
-
-GLuint Shader::GetSpecularShininessLocation()
-{
-	return uniformSpecularShininess;
-}
-
-GLuint Shader::GetEyePositionLocation()
-{
-	return uniformEyePosition;
-}
-
-GLuint Shader::GetInverseTransposeModelLocation()
-{
-	return uniformInverseTranspose;
-}
-
-GLuint Shader::GetUniformShouldUseTextureLocation()
-{
-	return uniformShouldUseTexture;
-}
-
-GLuint Shader::GetUniformNormalMapLocation()
-{
-	return uniformNormalMap;
-}
-
-GLuint Shader::GetUniformShouldUseNormalMapLocation()
-{
-	return uniformShouldUseNormalMap;
-}
-
 void Shader::SetDirectionalLight(DirectionalLight* dLight)
 {
 	dLight->UseLight(uniformDirectionalLight.uniformAmbientIntensity, uniformDirectionalLight.uniformColour, uniformDirectionalLight.uniformDiffuseIntensity, uniformDirectionalLight.uniformDirection);
@@ -245,44 +155,59 @@ void Shader::SetPointLights(PointLight* pLight, unsigned int lightCount)
 }
 
 
-void Shader::SetDirectionalLightTransform(glm::mat4* lTransform)
-{
-	glUniformMatrix4fv(uniformDirectionalLightTransform, 1, GL_FALSE, glm::value_ptr(*lTransform));
-}
-
-void Shader::SetTexture(GLuint textureUnit)
-{
-	glUniform1i(uniformTexture, textureUnit);
-}
-
-void Shader::SetDirectionalShadowMap(GLuint textureUnit)
-{
-	glUniform1i(uniformDirectionalShadowMap, textureUnit);
-}
-
-void Shader::SetNormalMap(GLuint textureUnit)
-{
-	glUniform1i(uniformNormalMap, textureUnit);
-}
-
-void Shader::SetGAlbedo(GLuint textureUnit)
-{
-	glUniform1i(uniformGAlbedoSpec, textureUnit);
-}
-
-void Shader::SetGPosition(GLuint textureUnit)
-{
-	glUniform1i(uniformGPosition, textureUnit);
-}
-
-void Shader::SetGNormal(GLuint textureUnit)
-{
-	glUniform1i(uniformGNormal, textureUnit);
-}
-
 void Shader::UseShader()
 {
 	glUseProgram(shaderID);
+}
+
+
+void Shader::setBool(const std::string& name, bool value)
+{
+	glUniform1i(glGetUniformLocation(shaderID, name.c_str()), (int)value);
+}
+void Shader::setInt(const std::string& name, int value)
+{
+	glUniform1i(glGetUniformLocation(shaderID, name.c_str()), value);
+}
+void Shader::setFloat(const std::string& name, float value)
+{
+	glUniform1f(glGetUniformLocation(shaderID, name.c_str()), value);
+}
+void Shader::setVec2(const std::string& name, const glm::vec2& value)
+{
+	glUniform2fv(glGetUniformLocation(shaderID, name.c_str()), 1, &value[0]);
+}
+void Shader::setVec2(const std::string& name, float x, float y)
+{
+	glUniform2f(glGetUniformLocation(shaderID, name.c_str()), x, y);
+}
+void Shader::setVec3(const std::string& name, const glm::vec3& value)
+{
+	glUniform3fv(glGetUniformLocation(shaderID, name.c_str()), 1, &value[0]);
+}
+void Shader::setVec3(const std::string& name, float x, float y, float z)
+{
+	glUniform3f(glGetUniformLocation(shaderID, name.c_str()), x, y, z);
+}
+void Shader::setVec4(const std::string& name, const glm::vec4& value)
+{
+	glUniform4fv(glGetUniformLocation(shaderID, name.c_str()), 1, &value[0]);
+}
+void Shader::setVec4(const std::string& name, float x, float y, float z, float w)
+{
+	glUniform4f(glGetUniformLocation(shaderID, name.c_str()), x, y, z, w);
+}
+void Shader::setMat2(const std::string& name, const glm::mat2& mat)
+{
+	glUniformMatrix2fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+void Shader::setMat3(const std::string& name, const glm::mat3& mat)
+{
+	glUniformMatrix3fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+void Shader::setMat4(const std::string& name, const glm::mat4& mat)
+{
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::ClearShader()
@@ -292,9 +217,6 @@ void Shader::ClearShader()
 		glDeleteProgram(shaderID);
 		shaderID = 0;
 	}
-
-	uniformModel = 0;
-	uniformProjection = 0;
 }
 
 Shader::~Shader()
