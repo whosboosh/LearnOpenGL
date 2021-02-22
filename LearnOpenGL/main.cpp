@@ -19,6 +19,7 @@
 #include "PointLight.h"
 #include "DirectionalLight.h"
 #include "Material.h"
+#include "GBuffer.h"
 
 // Uniform
 GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0,
@@ -34,10 +35,12 @@ float zOffset = 0.0f;
 Window mainWindow;
 std::vector<Mesh*> meshList;
 
-std::vector<Shader> shaderList;
+Shader geometryShader;
 Shader directionalShadowShader;
 Shader lightingPassShader;
 Shader lightBoxShader;
+
+GBuffer geometryFrameBuffer;
 
 Camera camera;
 
@@ -241,13 +244,7 @@ void CreateObjects() {
 void CreateShaders()
 {
 	// Shaders
-	static const char* vShader = "Shaders/geometry_shader.vert";
-	static const char* fShader = "Shaders/geometry_shader.frag";
-	Shader* shader1 = new Shader();
-
-	shader1->CreateFromFiles(vShader, fShader);
-	shaderList.push_back(*shader1);
-
+	geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
 	lightingPassShader.CreateFromFiles("Shaders/deferred_shading.vert", "Shaders/deferred_shading.frag");
 	lightBoxShader.CreateFromFiles("Shaders/light_box.vert", "Shaders/light_box.frag");
@@ -342,38 +339,46 @@ void DirectionalShadowMapPass(DirectionalLight* light)
 }
 
 
-void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+void RenderLightPass()
 {
-	shaderList[0].UseShader();
-
-	glViewport(0, 0, mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
-
-	// Clear window
-	glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	lightingPassShader.UseShader();
 
-	uniformModel = shaderList[0].GetModelLocation();
-
-	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	char gPositionStr[] = "gPosition";
+	geometryFrameBuffer.Read(GL_TEXTURE0, gPositionStr);
+	char gNormalStr[] = "gNormal";
+	geometryFrameBuffer.Read(GL_TEXTURE1, gNormalStr);
+	char gAlbedoSpec[] = "gAlbedoSpec";
+	geometryFrameBuffer.Read(GL_TEXTURE2, gAlbedoSpec);
+	
+	uniformModel = lightingPassShader.GetModelLocation();
+	lightingPassShader.SetDirectionalShadowMap(1);
+	lightingPassShader.SetNormalMap(2);
+	lightingPassShader.SetDirectionalLight(&mainLight);
+	lightingPassShader.SetPointLights(pointLights, pointLightCount);
 	glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
 
-	ComputePositionOffsets(xOffset, zOffset);
-	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
-	mainLight.UpdatePosition(xOffset, yOffset, zOffset);
-
-	shaderList[0].SetDirectionalLight(&mainLight);
-	shaderList[0].SetPointLights(pointLights, pointLightCount);
-
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
-	shaderList[0].SetDirectionalLightTransform(&lightTransform);
-
-	mainLight.GetShadowMap()->Read(GL_TEXTURE1); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
-	shaderList[0].SetTexture(0);
-	shaderList[0].SetDirectionalShadowMap(1);
-	shaderList[0].SetNormalMap(2);
+	geometryShader.SetDirectionalLightTransform(&lightTransform);
 
 	RenderScene();
+}
+
+void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
+{
+	geometryFrameBuffer.Write(); // glBindFrameBuffer(GL_FRAMEBUFFER, gBuffer);
+	geometryShader.UseShader(); 
+
+	uniformModel = geometryShader.GetModelLocation();
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+
+	mainLight.GetShadowMap()->Read(GL_TEXTURE1); // Make it so that all subsequent texture calls with be active to the shadowmap ( glBindTexture(GL_TEXTURE_2D, shadowMap) )
+	geometryShader.SetTexture(0);
+
+	RenderScene();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 int main()
@@ -402,15 +407,15 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	uniformProjection = shaderList[0].GetProjectionLocation();
-	uniformModel = shaderList[0].GetModelLocation();
-	uniformView = shaderList[0].GetViewLocation();
-	uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
-	uniformSpecularShininess = shaderList[0].GetSpecularShininessLocation();
-	uniformEyePosition = shaderList[0].GetEyePositionLocation();
-	uniformInverseTranspose = shaderList[0].GetInverseTransposeModelLocation();
-	uniformShouldUseTexture = shaderList[0].GetUniformShouldUseTextureLocation();
-	uniformShouldUseNormalMap = shaderList[0].GetUniformShouldUseNormalMapLocation();
+	uniformProjection = geometryShader.GetProjectionLocation();
+	uniformModel = geometryShader.GetModelLocation();
+	uniformView = geometryShader.GetViewLocation();
+	uniformSpecularIntensity = geometryShader.GetSpecularIntensityLocation();
+	uniformSpecularShininess = geometryShader.GetSpecularShininessLocation();
+	uniformEyePosition = geometryShader.GetEyePositionLocation();
+	uniformInverseTranspose = geometryShader.GetInverseTransposeModelLocation();
+	uniformShouldUseTexture = geometryShader.GetUniformShouldUseTextureLocation();
+	uniformShouldUseNormalMap = geometryShader.GetUniformShouldUseNormalMapLocation();
 
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferWidth(), 0.1f, 100.0f);
 
@@ -430,6 +435,15 @@ int main()
 		0.3f, 0.1f, 0.1f);
 	pointLightCount++;
 
+	geometryFrameBuffer = GBuffer(mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
+	geometryFrameBuffer.init();
+
+	lightingPassShader.UseShader();
+	lightingPassShader.SetGPosition(0);
+	lightingPassShader.SetGNormal(1);
+	lightingPassShader.SetGAlbedo(2);
+
+
 	// Loop until window closed
 	while (!mainWindow.getShouldClose()) {
 		// Delta time for synchronising events
@@ -443,8 +457,17 @@ int main()
 		camera.keyControl(mainWindow.getKeys(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
+		// Clear window
+		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ComputePositionOffsets(xOffset, zOffset);
+		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
+		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
+
 		DirectionalShadowMapPass(&mainLight);
-		RenderPass(projection, camera.calculateViewMatrix());
+		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
+		//RenderLightPass();
 
 		glUseProgram(0);
 

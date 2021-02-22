@@ -1,5 +1,18 @@
 #include "GBuffer.h"
 
+GBuffer::GBuffer()
+{
+    screenWidth = 0;
+    screenHeight = 0;
+
+    gBuffer = 0;
+    rboDepth = 0;
+
+    gPosition = 0;
+    gNormal = 0;
+    gAlbedoSpec = 0;
+}
+
 GBuffer::GBuffer(GLuint width, GLuint height)
 {
 	gBuffer = 0;
@@ -37,7 +50,7 @@ void GBuffer::init()
     // color + specular color buffer
     glGenTextures(1, &gAlbedoSpec);
     glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpec, 0);
@@ -63,6 +76,25 @@ void GBuffer::updateScreenSize(GLuint width, GLuint height)
 {
     screenHeight = height;
     screenWidth = width;
+}
+
+void GBuffer::Write()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+}
+
+void GBuffer::Read(GLenum textureUnit, char* type)
+{
+    glActiveTexture(textureUnit);
+    if (strcmp(type,"gPosition")) {
+        glBindTexture(GL_TEXTURE_2D, gPosition);
+    }
+    else if (strcmp(type,"gNormal")) {
+        glBindTexture(GL_TEXTURE_2D, gNormal);
+    }
+    else if (strcmp(type, "gAlbedoSpec")) {
+        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);
+    }
 }
 
 GBuffer::~GBuffer()

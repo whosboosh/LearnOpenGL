@@ -7,11 +7,13 @@
 class GBuffer
 {
 public:
+	GBuffer();
 	GBuffer(GLuint width, GLuint height);
 
 	void init();
-
 	void updateScreenSize(GLuint width, GLuint height);
+	void Write();
+	void Read(GLenum textureUnit, char* type);
 
 	~GBuffer();
 
