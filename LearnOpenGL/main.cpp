@@ -126,10 +126,10 @@ void CreateObjects() {
 
 
 	std::vector<Vertex> floorVertices = {
-		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, -1.0f, 0.0f} }, //BL
-		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, -1.0f, 0.0f} },//BR
-		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f} },//FL
-		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, -1.0f, 0.0f} }//FR
+		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
+		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
+		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
+		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
 	};
 
 	unsigned int floorIndices[] = {
@@ -137,9 +137,9 @@ void CreateObjects() {
 		1, 2, 3
 	};
 
-	calcAverageNormals(indices, &vertices);
-	calcAverageNormals(indices2, &vertices2);
-	//calcAverageNormals(floorIndices, &floorVertices);
+	calcAverageNormals(indices, &vertices, sizeof(indices) / sizeof(*indices));
+	calcAverageNormals(indices2, &vertices2, sizeof(indices2) / sizeof(*indices2));
+	calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
 
 	Mesh* obj1 = new Mesh();
 	obj1->CreateMeshIndex(&vertices, indices, sizeof(indices) / sizeof(*indices));
