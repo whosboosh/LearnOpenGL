@@ -11,6 +11,8 @@ public:
 	virtual bool init(GLuint width, GLuint height);
 	virtual void Write();
 	virtual void Read(GLenum textureUnit);
+
+	void updateShadowSize(GLuint width, GLuint height) { shadowWidth = width; shadowHeight = height; }
 	GLuint GetShadowWidth() { return shadowWidth; }
 	GLuint GetShadowHeight() { return shadowHeight; }
 

@@ -8,7 +8,7 @@
 #include "DirectionalLight.h"
 #include "PointLight.h"
 
-#include "GLAD\glad.h"
+#include "GLAD/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 

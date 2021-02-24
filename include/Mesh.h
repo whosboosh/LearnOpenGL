@@ -1,5 +1,5 @@
 #include <iostream>
-#include "GLAD\glad.h"
+#include "./GLAD/glad.h"
 
 class Mesh
 {

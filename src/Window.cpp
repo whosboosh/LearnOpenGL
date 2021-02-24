@@ -61,6 +61,7 @@ int Window::Initialise()
 	glfwSetWindowUserPointer(mainWindow, this);
 	glfwSetCursorPosCallback(mainWindow, mouse_callback);
 	glfwSetKeyCallback(mainWindow, key_callback);
+	glfwSetFramebufferSizeCallback(mainWindow, framebuffer_size_callback);
 	
 	return 0;
 }
@@ -123,3 +124,10 @@ void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	theWindow->lastY = ypos;
 }
 
+void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	theWindow->updateBufferSize(&theWindow->bufferWidth, &theWindow->bufferHeight);
+}
