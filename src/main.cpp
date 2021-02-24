@@ -27,8 +27,8 @@ uniformShouldUseTexture = 0, uniformShouldUseNormalMap = 0;
 unsigned int pointLightCount = 0;
 
 float xOffset = 0.0f;
-float yOffset = -6.0f;
-float zOffset = 0.0f;
+float yOffset = 6.0f;
+float zOffset = 10.0f;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -96,8 +96,23 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 	{
 		unsigned int nOffset = i * vLength + normalOffset;
 		glm::vec3 vec(vertices[nOffset], vertices[nOffset + 1], vertices[nOffset + 2]);
-		vec = glm::normalize(vec);
+		vec = -glm::normalize(vec);
 		vertices[nOffset] = vec.x; vertices[nOffset + 1] = vec.y; vertices[nOffset + 2] = vec.z;
+	}
+}
+
+void inverseNormal(GLfloat* vertices, unsigned int verticeCount)
+{
+	for (int i = 0; i < verticeCount; i++)
+	{
+		unsigned int normalX = vertices[(i*8)+5];
+		unsigned int normalY = vertices[(i*8)+6];
+		unsigned int normalZ = vertices[(i*8)+7];
+
+		vertices[(i*8)+5] = -normalX;
+		vertices[(i*8)+6] = -normalY;
+		vertices[(i*8)+7] = -normalZ;
+
 	}
 }
 
@@ -199,6 +214,7 @@ void CreateObjects() {
 	int numIndices = sizeof(indices) / sizeof(*indices);
 	//CalcNormals(vertices, 12, 5);
 	calcAverageNormals(indices, numIndices, vertices, sizeof(vertices) / sizeof(*vertices), 8, 5);
+	//inverseNormal(vertices, sizeof(vertices) / sizeof(*vertices));
 	Mesh* obj1 = new Mesh();
 	obj1->CreateMeshIndex(vertices, indices, sizeof(vertices) / sizeof(*vertices), numIndices);
 	meshList.push_back(obj1);
@@ -210,20 +226,23 @@ void CreateObjects() {
 	meshList.push_back(obj2);
 
 	GLfloat floorVertices[] = {
-		-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BL
-		20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 0.0f, -1.0f, 0.0f,//BR
-		-20.f, 0.0f, 20.0f, 0.0f, 10.0f, 0.0f, -1.0f, 0.0f,//FL
-		20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 0.0f, -1.0f, 0.0f//FR
+		-20.0f, 0.0f, -20.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,//BL
+		20.0f, 0.0f, -20.0f, 10.0f, 0.0f, 0.0f, 1.0f, 0.0f,//BR
+		-20.f, 0.0f, 20.0f, 0.0f, 10.0f, 0.0f, 1.0f, 0.0f,//FL
+		20.0f, 0.0f, 20.0f, 10.0f, 10.0f, 0.0f, 1.0f, 0.0f//FR
 	};
 
 
 	unsigned int floorIndices[] = {
-		0, 2, 1,
-		1, 2, 3
+		1,2,0,
+		3,2,1
 	};
 
 	Mesh* obj3 = new Mesh();
 	obj3->CreateMeshIndex(floorVertices, floorIndices, 32, 6);
+	numIndices = sizeof(floorIndices) / sizeof(*floorIndices);
+	//calcAverageNormals(floorIndices, numIndices, floorVertices, sizeof(floorVertices) / sizeof(*floorVertices), 8, 5);
+	//inverseNormal(floorVertices, sizeof(floorVertices) / sizeof(*floorVertices));
 	meshList.push_back(obj3);
 }
 
@@ -246,7 +265,7 @@ void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 
 	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
 
-	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
+	//fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
 	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
 }
 
@@ -284,7 +303,7 @@ void RenderScene()
 
 	// SUN
 	model = glm::mat4(1.0f); // Identity matrix
-	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
+	model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise

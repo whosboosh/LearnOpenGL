@@ -63,7 +63,7 @@ float CalcDirectionalShadowFactor()
 	float current = projCoords.z;
 	
 	vec3 normal = normalize(Normal);
-	vec3 lightDir = normalize(directionalLight.direction);
+	vec3 lightDir = normalize(directionalLight.direction - FragPos);
 	
 	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.0005);
 	
@@ -94,12 +94,12 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	
 	// Normal mapping
 	vec3 normal = normalize(Normal);
-	if (!shouldUseNormalMap)
+	if (shouldUseNormalMap)
 	{
 		// obtain normal from normal map in range [0,1]
 		normal = normalize(texture(normalMap, TexCoord).rgb*2.0 - 1.0);
 	}
-	vec3 lightDir = normalize(direction);
+	vec3 lightDir = normalize(direction - FragPos);
 	
 	float diffuseFactor = max(dot(normal, lightDir), 0.0f);
 	vec4 diffuseColour = vec4(light.colour * light.diffuseIntensity * diffuseFactor, 1.0f);
