@@ -25,7 +25,7 @@
 unsigned int pointLightCount = 0;
 
 float xOffset = 0.0f;
-float yOffset = -6.0f;
+float yOffset = 6.0f;
 float zOffset = 0.0f;
 
 Window mainWindow;
@@ -80,12 +80,12 @@ void CreateObjects() {
 			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 
-			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 8
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 8 back
 			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
 			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 
-			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 12
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 12 left
 			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
 			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
@@ -102,12 +102,12 @@ void CreateObjects() {
 	};
 
 	unsigned int indices[] = {
-		1,3,2, 2,0,1,  //Face front
-		4,7,6, 6,5,4, //Face right
-		10,8,9, 9,11,10, // Back
-		14,12,13, 13,15,14, // Left
-		16,17,19, 19,18,16, // Bottom
-		23,22,20, 20,21,23, // Top
+		2,3,1, 1,0,2,  //Face front
+		6,7,4, 4,5,6, //Face right
+		9,8,10, 10,11,9, // Back
+		13,12,14, 14,15,13, // Left
+		19,17,16, 16,18,19, // Bottom
+		20,22,23, 23,21,20, // Top
 	};
 
 	std::vector<Vertex> vertices2 = {
@@ -126,10 +126,10 @@ void CreateObjects() {
 
 
 	std::vector<Vertex> floorVertices = {
-		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
-		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
-		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
-		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
+		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }, //BL
+		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//BR
+		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//FL
+		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }//FR
 	};
 
 	unsigned int floorIndices[] = {
@@ -139,7 +139,7 @@ void CreateObjects() {
 
 	calcAverageNormals(indices, &vertices, sizeof(indices) / sizeof(*indices));
 	calcAverageNormals(indices2, &vertices2, sizeof(indices2) / sizeof(*indices2));
-	calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
+	//calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
 
 	Mesh* obj1 = new Mesh();
 	obj1->CreateMeshIndex(&vertices, indices, sizeof(indices) / sizeof(*indices));
@@ -170,7 +170,7 @@ void ComputePositionOffsets(float& fXOffset, float& fZOffset)
 
 	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
 
-	fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
+	//fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
 	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
 }
 
@@ -210,7 +210,7 @@ void RenderScene(Shader* shader)
 	shader->setBool("shouldUseNormalMap", 0);
 	dullMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
-	model = glm::translate(model, -glm::vec3(xOffset, yOffset, zOffset));
+	model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
@@ -291,7 +291,7 @@ int main()
 	brickDisplacement = Texture("Textures/bricks2_disp.jpg");
 	brickDisplacement.LoadTexture();
 
-	shinyMaterial = Material(0.5, 128);
+	shinyMaterial = Material(1.0f, 128);
 	dullMaterial = Material(0.3f, 4);
 
 	CreateObjects();
@@ -302,14 +302,14 @@ int main()
 
 	// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
 	mainLight = DirectionalLight(8192, 8192, 1.0f, 1.0f, 1.0f,
-		0.1f, 0.8f,
+		0.1f, 0.7f,
 		xOffset, yOffset, zOffset);
 	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
 		0.1f, 0.7f,
-		-2.0f, 2.0f, -3.0f,
+		-4.0f, 2.0f, -3.0f,
 		0.3f, 0.2f, 0.1f);
 	pointLightCount++;
-	pointLights[1] = PointLight(0.0f, 0.0f, 1.0f,
+	pointLights[1] = PointLight(1.0f, 0.0f, 0.0f,
 		0.1f, 0.7f,
 		4.0f, 2.0f, -3.0f,
 		0.3f, 0.1f, 0.1f);

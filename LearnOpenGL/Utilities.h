@@ -29,7 +29,7 @@ static void calcAverageNormals(unsigned int* indices, std::vector<Vertex>* verti
 		glm::vec3 v2(vertices->at(ln2).pos.x - vertices->at(ln0).pos.x, vertices->at(ln2).pos.y - vertices->at(ln0).pos.y, vertices->at(ln2).pos.z - vertices->at(ln0).pos.z);
 
 		glm::vec3 normal = glm::cross(v1, v2);
-		normal = glm::normalize(-normal);
+		normal = glm::normalize(normal);
 
 		vertices->at(ln0).normal.x += normal.x; vertices->at(ln0).normal.y += normal.y; vertices->at(ln0).normal.z += normal.z;
 		vertices->at(ln1).normal.x += normal.x; vertices->at(ln1).normal.y += normal.y; vertices->at(ln1).normal.z += normal.z;
@@ -39,9 +39,18 @@ static void calcAverageNormals(unsigned int* indices, std::vector<Vertex>* verti
 	for (size_t i = 0; i < vertices->size(); i++)
 	{
 		glm::vec3 vec(vertices->at(i).normal.x, vertices->at(i).normal.y, vertices->at(i).normal.z);
-		vec = glm::normalize(vec);
+		vec = -glm::normalize(vec); // Inverse normal because maths xd
 		vertices->at(i).normal.x = vec.x;
 		vertices->at(i).normal.y = vec.y;
 		vertices->at(i).normal.z = vec.z;
+	}
+}
+
+static void inverseNormal(std::vector<Vertex>* vertices)
+{
+	for (int i = 0; i < vertices->size(); i++)
+	{
+		glm::vec3 normal = vertices->at(i).normal;
+		vertices->at(i).normal = -normal;
 	}
 }
