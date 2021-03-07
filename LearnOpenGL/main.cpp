@@ -259,6 +259,8 @@ void RenderScene(Shader* shader)
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex();
+
+	multiSampler.BlitFrameBuffer();
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -395,8 +397,8 @@ int main()
 
 		screenShader.UseShader();
 		glBindVertexArray(quadVAO);
-		multiSampler.Read();
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		multiSampler.Read(GL_TEXTURE0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindVertexArray(0);
 
 		mainWindow.swapBuffers();
