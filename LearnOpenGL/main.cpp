@@ -362,18 +362,24 @@ int main()
 		camera.keyControl(mainWindow.getKeys(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
+
+
 		// 1. draw scene as normal in multisampled buffers
 		multiSampler.BindFrameBuffer();
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
+		DirectionalShadowMapPass(&mainLight);
+
+		multiSampler.BindFrameBuffer();
+
 		ComputePositionOffsets(xOffset, zOffset);
 		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
 		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
 
-		//DirectionalShadowMapPass(&mainLight);
-		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
+
+		RenderPass(projection, camera.calculateViewMatrix());
 
 		// 2. now blit multisampled buffer(s) to normal colorbuffer of intermediate FBO. Image is stored in screenTexture
 		multiSampler.BlitFrameBuffer();
