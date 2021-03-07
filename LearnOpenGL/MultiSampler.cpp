@@ -69,7 +69,7 @@ void MultiSampler::BindFrameBuffer()
 void MultiSampler::Read(GLenum textureUnit)
 {
     glActiveTexture(textureUnit);
-    glBindTexture(GL_TEXTURE_2D, textureColorBufferMultiSampled);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
 }
 
 MultiSampler::~MultiSampler()
