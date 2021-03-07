@@ -21,6 +21,7 @@
 #include "Material.h"
 #include "GBuffer.h"
 #include "Utilities.h"
+#include "MultiSampler.h"
 
 unsigned int pointLightCount = 0;
 
@@ -33,6 +34,7 @@ std::vector<Mesh*> meshList;
 
 Shader geometryShader;
 Shader directionalShadowShader;
+Shader antiAliasingShader;
 
 Camera camera;
 
@@ -41,6 +43,8 @@ Texture plainTexture;
 Texture brickDiffuse;
 Texture brickNormal;
 Texture brickDisplacement;
+
+MultiSampler multiSampler;
 
 Material shinyMaterial;
 Material dullMaterial;
@@ -137,6 +141,17 @@ void CreateObjects() {
 		1, 2, 3
 	};
 
+	float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
 	calcAverageNormals(indices, &vertices, sizeof(indices) / sizeof(*indices));
 	calcAverageNormals(indices2, &vertices2, sizeof(indices2) / sizeof(*indices2));
 	//calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
@@ -152,6 +167,11 @@ void CreateObjects() {
 	Mesh* obj3 = new Mesh();
 	obj3->CreateMeshIndex(&floorVertices, floorIndices, sizeof(floorIndices) / sizeof(*floorIndices));
 	meshList.push_back(obj3);
+
+	Mesh* quadObject = new Mesh();
+	quadObject->CreateMesh(quadVertices, (sizeof(quadVertices) / sizeof(*quadVertices)) / 4);
+	meshList.push_back(quadObject);
+
 }
 
 void CreateShaders()
@@ -159,6 +179,7 @@ void CreateShaders()
 	// Shaders
 	geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");
 	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
+	antiAliasingShader.CreateFromFiles("Shaders/anti_aliasing.vert", "Shaders/anti_aliasing.frag");
 }
 
 void ComputePositionOffsets(float& fXOffset, float& fZOffset)
@@ -226,6 +247,8 @@ void RenderScene(Shader* shader)
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex();
+
+	//multiSampler.BlitFrameBuffer();
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -267,7 +290,6 @@ void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	glm::mat4 lightTransform = mainLight.CalculateLightTransform();
 	geometryShader.setMat4("directionalLightTransform", lightTransform);
 
-
 	RenderScene(&geometryShader);
 }
 
@@ -290,6 +312,10 @@ int main()
 	brickNormal.LoadTexture();
 	brickDisplacement = Texture("Textures/bricks2_disp.jpg");
 	brickDisplacement.LoadTexture();
+
+	multiSampler = MultiSampler(mainWindow.getBufferWidth(), mainWindow.getBufferHeight());
+	multiSampler.init();
+	antiAliasingShader.setInt("screenTexture", 3);
 
 	shinyMaterial = Material(1.0f, 128);
 	dullMaterial = Material(0.3f, 4);
@@ -329,17 +355,28 @@ int main()
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
 		// Clear window
+		multiSampler.BindFrameBuffer();
 		glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
 
 		ComputePositionOffsets(xOffset, zOffset);
 		// Red, Green, Blue, ambientIntensity, diffuseIntensity, Pos(XYZ), 
 		mainLight.UpdatePosition(xOffset, yOffset, zOffset);
 
-		DirectionalShadowMapPass(&mainLight);
+		//DirectionalShadowMapPass(&mainLight);
 		RenderPass(projection, camera.calculateViewMatrix()); // Draw to GBuffer FrameBuffer
 
-		glUseProgram(0);
+		
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+
+		antiAliasingShader.UseShader();
+		multiSampler.Read(GL_TEXTURE3);
+		meshList[3]->RenderMesh();	
+		
 
 		mainWindow.swapBuffers();
 	}
