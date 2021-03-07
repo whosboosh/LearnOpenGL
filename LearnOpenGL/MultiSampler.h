@@ -13,7 +13,7 @@ public:
 	virtual void init();
 	virtual void BlitFrameBuffer();
 	virtual void BindFrameBuffer();
-	virtual void Read(GLenum textureUnit);
+	virtual void Read();
 
 	void updateScreenSize(GLuint width, GLuint height) {
 		screenHeight = height;
@@ -27,11 +27,8 @@ private:
 
 protected:
 	GLuint framebuffer;
-	GLuint textureColourBufferMultiSampled; // Mutlisampled colour attachment texture
+	GLuint textureColorbuffer; // Mutlisampled colour attachment texture
 	GLuint rbo; // Render buffer object for depth and stencil attachments
-
-	GLuint intermediateFBO; // Second framebuffer for post-processing
-	GLuint screenTexture;
 
 	GLuint screenWidth;
 	GLuint screenHeight;

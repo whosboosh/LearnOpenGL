@@ -2,11 +2,11 @@
 
 Mesh::Mesh()
 {
-	VAO = 0;
-	VBO = 0;
-	IBO = 0;
-	indexCount = 0;
-	verticeCount = 0;
+	//VAO = 0;
+	//VBO = 0;
+	//IBO = 0;
+	//indexCount = 0;
+	//verticeCount = 0;
 }
 
 void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices)
@@ -42,21 +42,20 @@ void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices,
 	glBindVertexArray(0);
 }
 
-void Mesh::CreateMesh(GLfloat* vertices, unsigned int numOfVertices)
+void Mesh::CreateMesh(GLfloat* vertices, unsigned int floatCount, unsigned int numOfVertices)
 {
 	verticeCount = numOfVertices;
 
 	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
 	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, floatCount, &vertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -71,10 +70,11 @@ void Mesh::RenderMeshIndex()
 	glBindVertexArray(0);
 }
 
-void Mesh::RenderMesh()
+void Mesh::RenderMesh(unsigned int texture)
 {
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, verticeCount);
+	glBindTexture(GL_TEXTURE_2D, texture);	// use the color attachment texture as the texture of the quad plane
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 }
 
