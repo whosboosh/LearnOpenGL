@@ -145,15 +145,15 @@ void CreateObjects() {
 	calcAverageNormals(indices2, &vertices2, sizeof(indices2) / sizeof(*indices2));
 	//calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
 
-	Mesh* obj1 = new Mesh();
+	Mesh* obj1 = new Mesh(&brickDiffuse, &dullMaterial);
 	obj1->CreateMeshIndex(&vertices, indices, sizeof(indices) / sizeof(*indices));
 	meshList.push_back(obj1);
 
-	Mesh* obj2 = new Mesh();
+	Mesh* obj2 = new Mesh(&brickDiffuse, &dullMaterial);
 	obj2->CreateMeshIndex(&vertices2, indices2, sizeof(indices2) / sizeof(*indices2));
 	meshList.push_back(obj2);
 
-	Mesh* obj3 = new Mesh();
+	Mesh* obj3 = new Mesh(&plainTexture, &shinyMaterial);
 	obj3->CreateMeshIndex(&floorVertices, floorIndices, sizeof(floorIndices) / sizeof(*floorIndices));
 	meshList.push_back(obj3);
 
@@ -221,8 +221,6 @@ void RenderScene(Shader* shader)
 	// CUBE
 	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 1);
-	brickDiffuse.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(shader);
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
 	//model = glm::rotate(model, glm::radians(curAngle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -230,29 +228,26 @@ void RenderScene(Shader* shader)
 	shader->setMat4("model", model);
 	// Set the inverse transpose model in the CPU not GPU since it will have to do it per vertex otherwise
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-	meshList[0]->RenderMeshIndex(); // Render object
+	meshList[0]->RenderMeshIndex(shader); // Render object
 
 	// SUN
 	shader->setBool("shouldUseTexture", 0);
 	shader->setBool("shouldUseNormalMap", 0);
-	dullMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
 	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-	meshList[1]->RenderMeshIndex();
+	meshList[1]->RenderMeshIndex(shader);
 
 	// FLOOR
 	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 0);
-	plainTexture.UseTexture(GL_TEXTURE0);
-	shinyMaterial.UseMaterial(shader);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
-	meshList[2]->RenderMeshIndex();
+	meshList[2]->RenderMeshIndex(shader);
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -326,7 +321,7 @@ int main()
 	multiSampler.init();
 
 	shinyMaterial = Material(1.0f, 128);
-	dullMaterial = Material(0.3f, 4);
+	dullMaterial = Material(0.3f,256);
 
 	CreateObjects();
 	CreateShaders();

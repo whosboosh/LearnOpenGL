@@ -1,20 +1,15 @@
 #include "Mesh.h"
 
-Mesh::Mesh()
+Mesh::Mesh(Texture* texture, Material* material)
 {
-	//VAO = 0;
-	//VBO = 0;
-	//IBO = 0;
-	//indexCount = 0;
-	//verticeCount = 0;
+	this->texture = texture;
+	this->material = material;
 }
 
 void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices)
 {
 	indexCount = numOfIndices;
 	verticeCount = vertices->size();
-
-	std::cout << (void*)offsetof(Vertex, col)<<"\n";
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -61,8 +56,11 @@ void Mesh::CreateMesh(GLfloat* vertices, unsigned int floatCount, unsigned int n
 	glBindVertexArray(0);
 }
 
-void Mesh::RenderMeshIndex()
+void Mesh::RenderMeshIndex(Shader* shader)
 {
+	texture->UseTexture(GL_TEXTURE0);
+	material->UseMaterial(shader);
+
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);

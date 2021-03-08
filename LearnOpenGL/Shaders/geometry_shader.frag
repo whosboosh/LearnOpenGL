@@ -104,21 +104,21 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	float diffuseFactor = max(dot(normal, lightDir), 0.0f);
 	vec4 diffuseColour = vec4(light.colour * light.diffuseIntensity * diffuseFactor, 1.0f);
 	
-	vec4 specularColour = vec4(0, 0, 0, 0);
+	vec4 specularColour = vec4(0.0, 0.0, 0.0, 0.0);
 	
-	if(diffuseFactor > 0.0f)
+	if(diffuseFactor > 0.0)
 	{
 		vec3 fragToEye = normalize(eyePosition - FragPos);
-		vec3 reflectedVertex = normalize(reflect(lightDir, normal));
+		vec3 reflectedVertex = normalize(reflect(direction, normal));
 		
 		float specularFactor = dot(fragToEye, reflectedVertex);
-		if(specularFactor > 0.0f)
+		if(specularFactor > 0.0)
 		{
 			specularFactor = pow(specularFactor, material.shininess);
-			specularColour = vec4(light.colour * material.specularIntensity * specularFactor, 1.0f);
+			specularColour = vec4(light.colour * material.specularIntensity * specularFactor, 1.0);
 		}
 	}
-
+	
 	return (ambientColour + (1.0 - shadowFactor) * (diffuseColour + specularColour));
 }
 
