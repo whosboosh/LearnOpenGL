@@ -43,6 +43,7 @@ Camera camera;
 
 MultiSampler multiSampler;
 
+Texture marbleTexture;
 Texture plainTexture;
 Texture brickDiffuse;
 Texture brickNormal;
@@ -156,7 +157,7 @@ void CreateObjects() {
 	obj2->CreateMeshIndex(&vertices2, indices2, sizeof(indices2) / sizeof(*indices2));
 	meshList.push_back(obj2);
 
-	Mesh* obj3 = new Mesh(&plainTexture, &shinyMaterial);
+	Mesh* obj3 = new Mesh(&marbleTexture, &shinyMaterial);
 	obj3->CreateMeshIndex(&floorVertices, floorIndices, sizeof(floorIndices) / sizeof(*floorIndices));
 	meshList.push_back(obj3);
 
@@ -255,7 +256,7 @@ void RenderScene(Shader* shader)
 	// MODEL
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-	model = glm::translate(model, glm::vec3(2.0f, -0.4f, -1.0f));
+	model = glm::translate(model, glm::vec3(1.0f, -0.4f, -1.0f));
 	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	shader->setMat4("model", model);
@@ -316,6 +317,9 @@ int main()
 	// GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, -10.0f, 5.0f, 0.05f);
 
+	marbleTexture = Texture("Textures/marble.jpg");
+	marbleTexture.LoadTexture();
+
 	plainTexture = Texture("Textures/plain.png");
 	plainTexture.LoadTexture();
 
@@ -351,12 +355,12 @@ int main()
 		0.1f, 0.7f,
 		xOffset, yOffset, zOffset);
 	pointLights[0] = PointLight(0.0f, 1.0f, 0.0f,
-		0.1f, 0.7f,
+		0.1f, 1.0f,
 		-4.0f, 2.0f, -3.0f,
 		0.3f, 0.2f, 0.1f);
 	pointLightCount++;
 	pointLights[1] = PointLight(1.0f, 0.0f, 0.0f,
-		0.1f, 0.7f,
+		0.1f, 1.0f,
 		4.0f, 2.0f, -3.0f,
 		0.3f, 0.1f, 0.1f);
 	pointLightCount++;
