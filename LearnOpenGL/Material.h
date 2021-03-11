@@ -2,17 +2,18 @@
 #include <glad/glad.h>
 #include "Shader.h"
 
-class Material
-{
-public:
-	Material();
-	Material(GLfloat sIntensity, GLfloat shine);
+namespace opengl {
+	class Material
+	{
+	public:
+		Material();
+		Material(GLfloat sIntensity, GLfloat shine);
 
-	void UseMaterial(Shader* shader);
+		void UseMaterial(Shader* shader);
 
-	~Material();
-private:
-	GLfloat specularIntensity;
-	GLfloat shininess;
-};
-
+		~Material();
+	private:
+		GLfloat specularIntensity;
+		GLfloat shininess;
+	};
+}

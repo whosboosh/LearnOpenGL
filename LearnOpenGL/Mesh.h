@@ -6,22 +6,23 @@
 #include "Texture.h"
 #include "Material.h"
 
-class Mesh
-{
-public:
-	Mesh(Texture* texture, Material* material);
-	void CreateMesh(GLfloat *vertices, unsigned int verticeCount, unsigned int numOfVertices);
-	void CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices);
-	void RenderMesh(unsigned int texture);
-	void RenderMeshIndex(Shader* shader);
-	void ClearMesh();
-	~Mesh();
-private:
-	unsigned int VAO, VBO, IBO;
-	GLsizei indexCount;
-	GLsizei verticeCount;
+namespace opengl {
+	class Mesh
+	{
+	public:
+		Mesh(Texture* texture, Material* material);
+		void CreateMesh(GLfloat* vertices, unsigned int verticeCount, unsigned int numOfVertices);
+		void CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices);
+		void RenderMesh(unsigned int texture);
+		void RenderMeshIndex(Shader* shader);
+		void ClearMesh();
+		~Mesh();
+	private:
+		unsigned int VAO, VBO, IBO;
+		GLsizei indexCount;
+		GLsizei verticeCount;
 
-	Texture* texture;
-	Material* material;
-};
-
+		Texture* texture;
+		Material* material;
+	};
+}

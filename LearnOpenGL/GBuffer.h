@@ -4,29 +4,30 @@
 #include <glad/glad.h>
 #include <iostream>
 
-class GBuffer
-{
-public:
-	GBuffer();
-	GBuffer(GLuint width, GLuint height);
+namespace opengl {
+	class GBuffer
+	{
+	public:
+		GBuffer();
+		GBuffer(GLuint width, GLuint height);
 
-	void init();
-	void updateScreenSize(GLuint width, GLuint height);
-	void BindFrameBuffer();
-	void ReadFrameBuffer();
-	void Read(GLenum textureUnit, char* type);
+		void init();
+		void updateScreenSize(GLuint width, GLuint height);
+		void BindFrameBuffer();
+		void ReadFrameBuffer();
+		void Read(GLenum textureUnit, char* type);
 
-	~GBuffer();
+		~GBuffer();
 
-private:
-	GLuint gBuffer;
-	GLuint rboDepth;
+	private:
+		GLuint gBuffer;
+		GLuint rboDepth;
 
-	GLuint gPosition;
-	GLuint gNormal;
-	GLuint gAlbedoSpec;
+		GLuint gPosition;
+		GLuint gNormal;
+		GLuint gAlbedoSpec;
 
-	GLuint screenWidth;
-	GLuint screenHeight;
-};
-
+		GLuint screenWidth;
+		GLuint screenHeight;
+	};
+}

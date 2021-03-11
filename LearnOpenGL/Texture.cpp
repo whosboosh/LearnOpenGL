@@ -1,96 +1,97 @@
 #include "Texture.h"
-
-Texture::Texture()
-{
-	textureID = 0;
-	width = 0;
-	height = 0;
-	bitDepth = 0;
-	fileLocation = NULL;
-}
-
-Texture::Texture(const char *fileLoc)
-{
-	textureID = 0;
-	width = 0;
-	height = 0;
-	bitDepth = 0;
-	fileLocation = fileLoc;
-}
-
-bool Texture::LoadTexture()
-{
-	unsigned char *texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
-	if (!texData)
+namespace opengl {
+	Texture::Texture()
 	{
-		printf("Failed to find: %s\n", fileLocation);
-		return false;
+		textureID = 0;
+		width = 0;
+		height = 0;
+		bitDepth = 0;
+		fileLocation = NULL;
 	}
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	
-	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(texData);
-
-	return true;
-}
-
-bool Texture::LoadTextureA()
-{
-	unsigned char* texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
-	if (!texData)
+	Texture::Texture(const char* fileLoc)
 	{
-		printf("Failed to find: %s\n", fileLocation);
-		return false;
+		textureID = 0;
+		width = 0;
+		height = 0;
+		bitDepth = 0;
+		fileLocation = fileLoc;
 	}
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	bool Texture::LoadTexture()
+	{
+		unsigned char* texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
+		if (!texData)
+		{
+			printf("Failed to find: %s\n", fileLocation);
+			return false;
+		}
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
-	glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-	stbi_image_free(texData);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	return true;
-}
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(texData);
 
-void Texture::UseTexture(GLenum textureUnit)
-{
-	glActiveTexture(textureUnit);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-}
+		return true;
+	}
 
-void Texture::RemoveTexture()
-{
-	glDisable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
+	bool Texture::LoadTextureA()
+	{
+		unsigned char* texData = stbi_load(fileLocation, &width, &height, &bitDepth, 0);
+		if (!texData)
+		{
+			printf("Failed to find: %s\n", fileLocation);
+			return false;
+		}
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
 
-void Texture::ClearTexture()
-{
-	glDeleteTextures(1, &textureID);
-	textureID = 0;
-	width = 0;
-	height = 0;
-	bitDepth = 0;
-	fileLocation = NULL;
-}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-Texture::~Texture()
-{
-	ClearTexture();
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(texData);
+
+		return true;
+	}
+
+	void Texture::UseTexture(GLenum textureUnit)
+	{
+		glActiveTexture(textureUnit);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	}
+
+	void Texture::RemoveTexture()
+	{
+		glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Texture::ClearTexture()
+	{
+		glDeleteTextures(1, &textureID);
+		textureID = 0;
+		width = 0;
+		height = 0;
+		bitDepth = 0;
+		fileLocation = NULL;
+	}
+
+	Texture::~Texture()
+	{
+		ClearTexture();
+	}
 }

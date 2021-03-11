@@ -3,24 +3,28 @@
 #include <GLAD\glad.h>
 #include "stb_image.h"
 
-class Texture
-{
-public:
-	Texture();
-	Texture(const char* fileLoc);
+namespace opengl {
+	class Texture
+	{
+	public:
+		Texture();
+		Texture(const char* fileLoc);
 
-	bool LoadTexture();
-	bool LoadTextureA();
-	void UseTexture(GLenum textureUnit);
-	void ClearTexture();
-	void RemoveTexture();
+		bool LoadTexture();
+		bool LoadTextureA();
+		void UseTexture(GLenum textureUnit);
+		void ClearTexture();
+		void RemoveTexture();
 
-	~Texture();
+		~Texture();
 
-private:
-	GLuint textureID;
-	int width, height, bitDepth;
+	private:
+		GLuint textureID;
+		int width, height, bitDepth;
 
-	const char *fileLocation;
-};
+		const char* fileLocation;
+	};
+
+
+}
 

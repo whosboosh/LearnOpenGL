@@ -1,26 +1,28 @@
 #pragma once
 #include "Light.h"
-class DirectionalLight :
-    public Light
-{
-public:
-    DirectionalLight();
 
-    DirectionalLight(GLfloat shadowWidth, GLfloat shadowHeight,
-        GLfloat red, GLfloat green, GLfloat blue,
-        GLfloat aIntensity, GLfloat dIntensity,
-        GLfloat xDir, GLfloat yDir, GLfloat zDir);
+namespace opengl {
+    class DirectionalLight :
+        public Light
+    {
+    public:
+        DirectionalLight();
 
-    void UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation,
-       GLuint diffuseIntensityLocation, GLuint directionLocation);
+        DirectionalLight(GLfloat shadowWidth, GLfloat shadowHeight,
+            GLfloat red, GLfloat green, GLfloat blue,
+            GLfloat aIntensity, GLfloat dIntensity,
+            GLfloat xDir, GLfloat yDir, GLfloat zDir);
 
-    void UpdatePosition(GLfloat xDir, GLfloat yDir, GLfloat zDir);
+        void UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation,
+            GLuint diffuseIntensityLocation, GLuint directionLocation);
 
-    glm::mat4 CalculateLightTransform();
+        void UpdatePosition(GLfloat xDir, GLfloat yDir, GLfloat zDir);
 
-    ~DirectionalLight();
+        glm::mat4 CalculateLightTransform();
 
-private:
-    glm::vec3 direction;
-};
+        ~DirectionalLight();
 
+    private:
+        glm::vec3 direction;
+    };
+}
