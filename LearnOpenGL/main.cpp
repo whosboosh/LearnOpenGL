@@ -22,6 +22,7 @@
 #include "GBuffer.h"
 #include "Utilities.h"
 #include "MultiSampler.h"
+#include "Model.h"
 
 unsigned int pointLightCount = 0;
 
@@ -31,6 +32,8 @@ float zOffset = 0.0f;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
+
+Model vikingRoom;
 
 Shader geometryShader;
 Shader directionalShadowShader;
@@ -248,6 +251,17 @@ void RenderScene(Shader* shader)
 	shader->setMat4("model", model);
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex(shader);
+
+	// MODEL
+	model = glm::mat4(1.0f); // Identity matrix
+	model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+	model = glm::translate(model, glm::vec3(2.0f, -0.4f, -1.0f));
+	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(-180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	shader->setMat4("model", model);
+	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+
+	vikingRoom.RenderModel(shader);
 }
 
 void DirectionalShadowMapPass(DirectionalLight* light)
@@ -312,6 +326,9 @@ int main()
 	brickDisplacement = Texture("Textures/bricks2_disp.jpg");
 	brickDisplacement.LoadTexture();
 
+	vikingRoom = Model("Models/viking_room.obj", new Texture("Textures/viking_room.png"));
+	vikingRoom.LoadModel();
+
 
 	// shader configuration
 	// --------------------
@@ -321,7 +338,7 @@ int main()
 	multiSampler.init();
 
 	shinyMaterial = Material(1.0f, 128);
-	dullMaterial = Material(0.3f,256);
+	dullMaterial = Material(0.3f,4);
 
 	CreateObjects();
 	CreateShaders();
