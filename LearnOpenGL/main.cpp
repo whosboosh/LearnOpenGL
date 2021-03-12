@@ -42,6 +42,7 @@ namespace opengl {
 
 	Camera camera;
 
+<<<<<<< HEAD
 	MultiSampler multiSampler;
 
 	Texture marbleTexture;
@@ -186,6 +187,153 @@ namespace opengl {
 	}
 
 	void CreateShaders()
+=======
+float curAngle = 0.0f;
+
+double deltaTime = 0.0f;
+double lastTime = 0.0f;
+
+float curSize = 0.4f;
+float maxSize = 0.8f;
+float minSize = 0.1f;
+bool sizeDirection = false;
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+
+void CreateObjects() {
+	std::vector<Vertex> vertices = {
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 0
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 4
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 8 back
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 12 left
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }}, // 16
+			{ { 1.0, -1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, -1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+
+			{ { -1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }}, // 20
+			{ { 1.0, 1.0, 1.0 }, { 1.0, 1.0, 1.0 }, { 0.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+			{ { -1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
+	};
+
+	std::vector<uint32_t> indices = {
+		2,3,1, 1,0,2,  //Face front
+		6,7,4, 4,5,6, //Face right
+		9,8,10, 10,11,9, // Back
+		13,12,14, 14,15,13, // Left
+		19,17,16, 16,18,19, // Bottom
+		20,22,23, 23,21,20, // Top
+	};
+
+	std::vector<Vertex> vertices2 = {
+		{ { -1.0, -1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 0.0, -1.0, 1.0 }, {1.0, 1.0, 1.0 }, { 0.5, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 1.0, -1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 1.0, 0.0 }, { 0.0, 0.0, 0.0 }},
+		{ { 0.0, 1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.5, 1.0 }, { 0.0, 0.0, 0.0 }},
+	};
+
+	std::vector<uint32_t> indices2 = {
+		0,3,1,
+		1,2,3,
+		2,3,0,
+		0,1,2
+	};
+
+	std::vector<Vertex> floorVertices = {
+	{ { -40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
+	{ { 40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
+	{ { -40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
+	{ { 40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
+	};
+
+	std::vector<uint32_t> floorIndices = {
+		0, 2, 1,
+		1, 2, 3
+	};
+
+	calcAverageNormals(&vertices, &indices);
+	calcAverageNormals(&vertices2, &indices2);
+	//calcAverageNormals(&floorVertices, &floorIndices);
+
+	Mesh* obj1 = new Mesh(&brickDiffuse, &dullMaterial);
+	obj1->CreateMeshIndex(&vertices, &indices);
+	meshList.push_back(obj1);
+
+	Mesh* obj2 = new Mesh(&brickDiffuse, &dullMaterial);
+	obj2->CreateMeshIndex(&vertices2, &indices2);
+	meshList.push_back(obj2);
+
+	Mesh* obj3 = new Mesh();
+	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
+	meshList.push_back(obj3);
+
+
+	float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+	// positions   // texCoords
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f
+	};
+	// setup screen VAO
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+}
+
+void CreateShaders()
+{
+	// Shaders
+	geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");
+	directionalShadowShader.CreateFromFiles("Shaders/directional_shadow_map.vert", "Shaders/directional_shadow_map.frag");
+	screenShader.CreateFromFiles("Shaders/anti_aliasing.vert", "Shaders/anti_aliasing.frag");
+}
+
+void ComputePositionOffsets(float& fXOffset, float& fZOffset)
+{
+	const float fLoopDuration = 20.0f;
+	const float fScale = 3.14159f * 2.0f / fLoopDuration;
+
+	float fElapsedTime = glfwGetTime();
+
+	float fCurrTimeThroughLoop = fmodf(fElapsedTime, fLoopDuration);
+
+	//fXOffset = cosf(fCurrTimeThroughLoop * fScale) * 10.0f;
+	fZOffset = (sinf(fCurrTimeThroughLoop * fScale) * 10.0f);
+}
+
+void RenderScene(Shader* shader)
+{
+	if (direction)
+>>>>>>> master
 	{
 		// Shaders
 		geometryShader.CreateFromFiles("Shaders/geometry_shader.vert", "Shaders/geometry_shader.frag");

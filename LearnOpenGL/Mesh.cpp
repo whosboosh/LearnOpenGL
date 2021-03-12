@@ -63,9 +63,13 @@ namespace opengl {
 	void Mesh::RenderMeshIndex(Shader* shader)
 	{
 		if (texture != nullptr && material != nullptr) {
+			shader->setBool("shouldUseTexture", 1);
 			texture->UseTexture(GL_TEXTURE0);
 			material->UseMaterial(shader);
-		}		
+		}
+		else {
+			shader->setBool("shouldUseTexture", 0);
+		}	
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);

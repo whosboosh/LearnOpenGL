@@ -20,10 +20,15 @@ namespace opengl {
 		OpenGL();
 
 		void init(Window* window, Camera* camera);
-		void draw();
+		void draw(glm::mat4 projectionMatrix);
 
-		void setModelList(std::vector<Model> *modelList);
-		void setMeshList(std::vector<Mesh> *meshList);
+		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
+		void RenderScene(Shader* shader);
+
+		void addMesh(Mesh mesh);
+
+		void setModelList(std::vector<Model*> modelList);
+		void setMeshList(std::vector<Mesh*> meshList);
 
 		~OpenGL();
 
@@ -31,8 +36,8 @@ namespace opengl {
 		Camera* camera;
 		Window* window;
 
-		std::vector<Model> *modelList;
-		std::vector<Mesh> *meshList;
+		std::vector<Model*> modelList;
+		std::vector<Mesh*> meshList;
 
 		Shader geometryShader;
 		Shader directionalShadowShader;
