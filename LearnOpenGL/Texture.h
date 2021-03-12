@@ -1,7 +1,9 @@
 #pragma once
 
 #include <GLAD\glad.h>
+#ifndef STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#endif
 
 namespace opengl {
 	class Texture

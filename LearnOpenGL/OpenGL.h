@@ -1,47 +1,45 @@
-#pragma once
-
 #include "Mesh.h"
 #include "Shader.h"
-#include "Window.h"
-#include "Camera.h"
+#include "../../API Wrapper/Window.h"
+#include "../../API Wrapper/Camera.h"
 #include "Texture.h"
 #include "PointLight.h"
 #include "DirectionalLight.h"
 #include "Material.h"
 #include "GBuffer.h"
 #include "Utilities.h"
-#include "Window.h"
+#include "MultiSampler.h"
+#include "Model.h"
+
+#include <iostream>
 
 namespace opengl {
 	class OpenGL
 	{
 	public:
-		OpenGL(unsigned int width, unsigned int height);
+		OpenGL();
 
-		Window* getWindow() { return window; }
-		Camera* getCamera() { return camera; }
+		void init(Window* window, Camera* camera);
+		void draw();
 
-		void CameraControl(float deltaTime);
-
-		void RenderScene(Shader* shader);
-		void DirectionalShadowPass();
-		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
-
-		void UpdateObjects(std::vector<Vertex> meshList, DirectionalLight light, std::vector<PointLight> pointLights);
+		void setModelList(std::vector<Model> *modelList);
+		void setMeshList(std::vector<Mesh> *meshList);
 
 		~OpenGL();
 
 	private:
-		Window* window;
 		Camera* camera;
+		Window* window;
+
+		std::vector<Model> *modelList;
+		std::vector<Mesh> *meshList;
 
 		Shader geometryShader;
 		Shader directionalShadowShader;
 		Shader screenShader;
-
-		DirectionalLight* mainLight;
-		std::vector<Vertex> meshList;
-		PointLight pointLights[];
+		MultiSampler multiSampler;
 	};
 
 }
+
+

@@ -1,4 +1,6 @@
 #include "Texture.h"
+
+
 namespace opengl {
 	Texture::Texture()
 	{
