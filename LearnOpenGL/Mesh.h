@@ -12,7 +12,7 @@ namespace opengl {
 	public:
 		Mesh(Texture* texture, Material* material);
 		void CreateMesh(GLfloat* vertices, unsigned int verticeCount, unsigned int numOfVertices);
-		void CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices);
+		void CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices);
 		void RenderMesh(unsigned int texture);
 		void RenderMeshIndex(Shader* shader);
 		void ClearMesh();

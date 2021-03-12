@@ -7,9 +7,9 @@ namespace opengl {
 		this->material = material;
 	}
 
-	void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, unsigned int* indices, int numOfIndices)
+	void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
 	{
-		indexCount = numOfIndices;
+		indiceCount = indices->size();
 		verticeCount = vertices->size();
 
 		glGenVertexArrays(1, &VAO);
@@ -17,11 +17,11 @@ namespace opengl {
 
 		glGenBuffers(1, &IBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices, GL_DYNAMIC_DRAW);
-
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indiceCount, indices->data(), GL_DYNAMIC_DRAW);
+		
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices->size(), &vertices->at(0).pos.x, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * verticeCount, &vertices->at(0).pos.x, GL_DYNAMIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 		glEnableVertexAttribArray(0);
@@ -94,13 +94,14 @@ namespace opengl {
 			glDeleteVertexArrays(1, &VAO);
 			VAO = 0;
 		}
-		indexCount = 0;
+		indiceCount = 0;
 	}
 
 	Mesh::~Mesh()
 	{
 		ClearMesh();
 	}
+}
 
 
 }

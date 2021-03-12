@@ -113,7 +113,7 @@ namespace opengl {
 
 		meshToTex.push_back(mesh->mMaterialIndex);
 		Mesh* newMesh = new Mesh(textureList[meshIndex], standardMaterial);
-		newMesh->CreateMeshIndex(&vertices, indices.data(), indices.size());
+		newMesh->CreateMeshIndex(&vertices, &indices);
 		meshList.push_back(newMesh);
 	}
 
