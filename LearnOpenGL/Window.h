@@ -12,6 +12,8 @@ public:
 
 	Window(GLint windowWidth, GLint windowHeight);
 
+	int switchApi();
+
 	int Initialise();
 
 	GLint getBufferWidth() { return bufferWidth; }

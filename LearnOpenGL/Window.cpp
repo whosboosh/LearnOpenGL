@@ -23,6 +23,24 @@ int Window::Initialise()
 		return 1;
 	}
 
+	// Create the window
+	mainWindow = glfwCreateWindow(width, height, "Test Window", NULL, NULL);
+	if (!mainWindow)
+	{
+		printf("Error creating GLFW window!");
+		glfwTerminate();
+		return 1;
+	}
+
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetWindowUserPointer(mainWindow, this);
+	glfwSetCursorPosCallback(mainWindow, mouse_callback);
+	glfwSetKeyCallback(mainWindow, key_callback);
+	glfwSetFramebufferSizeCallback(mainWindow, framebuffer_size_callback);
+}
+
+int Window::switchApi()
+{
 	// Setup GLFW Windows Properties
 	// OpenGL version
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -35,15 +53,6 @@ int Window::Initialise()
 	// Enable multisampling buffer for MSAA
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	// Create the window
-	mainWindow = glfwCreateWindow(width, height, "Test Window", NULL, NULL);
-	if (!mainWindow)
-	{
-		printf("Error creating GLFW window!");
-		glfwTerminate();
-		return 1;
-	}
-
 	// Get buffer size information
 	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
 
@@ -55,18 +64,12 @@ int Window::Initialise()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_MULTISAMPLE);
 
 	// Create Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
-	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	glfwSetWindowUserPointer(mainWindow, this);
-	glfwSetCursorPosCallback(mainWindow, mouse_callback);
-	glfwSetKeyCallback(mainWindow, key_callback);
-	glfwSetFramebufferSizeCallback(mainWindow, framebuffer_size_callback);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
 }
 
 GLfloat Window::getXChange()
@@ -114,6 +117,14 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+
+	auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+	int bufferWidth;
+	int bufferHeight;
+	glfwGetFramebufferSize(app->mainWindow, &bufferWidth, &bufferHeight);
+
+	app->bufferWidth = bufferWidth;
+	app->bufferHeight = bufferHeight;
 }
 
 void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos)

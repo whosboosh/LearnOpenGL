@@ -81,7 +81,7 @@ void Model::LoadNode(aiNode* node, const aiScene* scene)
 void Model::LoadMesh(aiMesh* mesh, unsigned int meshIndex, const aiScene* scene)
 {
 	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<uint32_t> indices;
 
 	vertices.resize(mesh->mNumVertices);
 	for (size_t i = 0; i < mesh->mNumVertices; i++) {
@@ -112,7 +112,7 @@ void Model::LoadMesh(aiMesh* mesh, unsigned int meshIndex, const aiScene* scene)
 
 	meshToTex.push_back(mesh->mMaterialIndex);
 	Mesh* newMesh = new Mesh(textureList[meshIndex], standardMaterial);
-	newMesh->CreateMeshIndex(&vertices, indices.data(), indices.size());
+	newMesh->CreateMeshIndex(&vertices, &indices);
 	meshList.push_back(newMesh);
 }
 

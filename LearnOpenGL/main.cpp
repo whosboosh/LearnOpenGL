@@ -109,7 +109,7 @@ void CreateObjects() {
 			{ { 1.0, 1.0, -1.0 }, { 1.0, 1.0, 1.0 }, { 1.0, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-	unsigned int indices[] = {
+	std::vector<uint32_t> indices = {
 		2,3,1, 1,0,2,  //Face front
 		6,7,4, 4,5,6, //Face right
 		9,8,10, 10,11,9, // Back
@@ -125,13 +125,12 @@ void CreateObjects() {
 		{ { 0.0, 1.0, 0.0 }, {1.0, 1.0, 1.0 }, { 0.5, 1.0 }, { 0.0, 0.0, 0.0 }},
 	};
 
-	unsigned int indices2[] = {
+	std::vector<uint32_t> indices2 = {
 		0,3,1,
 		1,2,3,
 		2,3,0,
 		0,1,2
 	};
-
 
 	std::vector<Vertex> floorVertices = {
 		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }, //BL
@@ -140,25 +139,25 @@ void CreateObjects() {
 		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }//FR
 	};
 
-	unsigned int floorIndices[] = {
+	std::vector<uint32_t> floorIndices = {
 		0, 2, 1,
 		1, 2, 3
 	};
 
-	calcAverageNormals(indices, &vertices, sizeof(indices) / sizeof(*indices));
-	calcAverageNormals(indices2, &vertices2, sizeof(indices2) / sizeof(*indices2));
-	//calcAverageNormals(floorIndices, &floorVertices, sizeof(floorIndices) / sizeof(*floorIndices));
+	calcAverageNormals(&vertices, &indices);
+	calcAverageNormals(&vertices2, &indices2);
+	//calcAverageNormals(&floorVertices, &floorIndices);
 
 	Mesh* obj1 = new Mesh(&brickDiffuse, &dullMaterial);
-	obj1->CreateMeshIndex(&vertices, indices, sizeof(indices) / sizeof(*indices));
+	obj1->CreateMeshIndex(&vertices, &indices);
 	meshList.push_back(obj1);
 
 	Mesh* obj2 = new Mesh(&brickDiffuse, &dullMaterial);
-	obj2->CreateMeshIndex(&vertices2, indices2, sizeof(indices2) / sizeof(*indices2));
+	obj2->CreateMeshIndex(&vertices2, &indices2);
 	meshList.push_back(obj2);
 
 	Mesh* obj3 = new Mesh(&marbleTexture, &shinyMaterial);
-	obj3->CreateMeshIndex(&floorVertices, floorIndices, sizeof(floorIndices) / sizeof(*floorIndices));
+	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
 	meshList.push_back(obj3);
 
 
@@ -311,6 +310,7 @@ int main()
 {
 	mainWindow = Window(1600, 900);
 	mainWindow.Initialise();
+	mainWindow.switchApi();
 
 	// Start Pos (x,y,z)
 	// Start Up (x,y,z)

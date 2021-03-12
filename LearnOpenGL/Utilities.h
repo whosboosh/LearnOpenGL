@@ -14,16 +14,16 @@ struct Vertex {
 };
 
 
-static void calcAverageNormals(unsigned int* indices, std::vector<Vertex>* vertices, int numIndices)
+static void calcAverageNormals(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
 {
 	// For each face in a mesh, ln0, ln1, ln2 correspond to each vertex of that face.
 	// We want to create two new vector
 
-	for (size_t i = 0; i < numIndices; i += 3)
+	for (size_t i = 0; i < indices->size(); i += 3)
 	{
-		unsigned int ln0 = indices[i];
-		unsigned int ln1 = indices[i+1];
-		unsigned int ln2 = indices[i+2];
+		unsigned int ln0 = indices->at(i);
+		unsigned int ln1 = indices->at(i + 1);
+		unsigned int ln2 = indices->at(i + 2);
 
 		glm::vec3 v1(vertices->at(ln1).pos.x - vertices->at(ln0).pos.x, vertices->at(ln1).pos.y - vertices->at(ln0).pos.y, vertices->at(ln1).pos.z - vertices->at(ln0).pos.z);
 		glm::vec3 v2(vertices->at(ln2).pos.x - vertices->at(ln0).pos.x, vertices->at(ln2).pos.y - vertices->at(ln0).pos.y, vertices->at(ln2).pos.z - vertices->at(ln0).pos.z);
