@@ -20,8 +20,8 @@ namespace opengl {
 		~Mesh();
 	private:
 		unsigned int VAO, VBO, IBO;
-		GLsizei indiceCount;
-		GLsizei verticeCount;
+		unsigned int indiceCount;
+		unsigned int verticeCount;
 
 		Texture* texture;
 		Material* material;

@@ -67,9 +67,12 @@ namespace opengl {
 		RenderScene(&geometryShader);
 	}
 
-	void OpenGL::addMesh(Mesh mesh)
+	void OpenGL::addMesh(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
 	{
-		meshList.push_back(&mesh);
+		// Create a mesh
+		opengl::Mesh* mesh = new opengl::Mesh();
+		mesh->CreateMeshIndex(vertices, indices);
+		meshList.push_back(mesh);
 	}
 
 	void OpenGL::setModelList(std::vector<Model*> modelList)

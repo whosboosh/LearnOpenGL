@@ -13,8 +13,9 @@ namespace opengl {
 
 	void Mesh::CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
 	{
-		indiceCount = indices->size();
-		verticeCount = vertices->size();
+
+		this->indiceCount = indices->size();
+		this->verticeCount = vertices->size();
 
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
@@ -70,6 +71,8 @@ namespace opengl {
 		else {
 			shader->setBool("shouldUseTexture", 0);
 		}	
+
+		std::cout << indiceCount<<"\n";
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);

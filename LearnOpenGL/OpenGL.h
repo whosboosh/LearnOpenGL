@@ -26,7 +26,7 @@ namespace opengl {
 		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
 		void RenderScene(Shader* shader);
 
-		void addMesh(Mesh mesh);
+		void addMesh(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices);
 
 		void setModelList(std::vector<Model*> modelList);
 		void setMeshList(std::vector<Mesh*> meshList);
