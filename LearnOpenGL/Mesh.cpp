@@ -62,8 +62,8 @@ namespace opengl {
 
 	void Mesh::RenderMeshIndex(Shader* shader)
 	{
+		shader->setBool("shouldUseTexture", 1);
 		if (texture != nullptr && material != nullptr) {
-			shader->setBool("shouldUseTexture", 1);
 			texture->UseTexture(GL_TEXTURE0);
 			material->UseMaterial(shader);
 		}
