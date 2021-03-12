@@ -1,6 +1,10 @@
 #include "Mesh.h"
 
 namespace opengl {
+	Mesh::Mesh()
+	{
+	}
+
 	Mesh::Mesh(Texture* texture, Material* material)
 	{
 		this->texture = texture;
@@ -52,15 +56,16 @@ namespace opengl {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
 
 	void Mesh::RenderMeshIndex(Shader* shader)
 	{
-		texture->UseTexture(GL_TEXTURE0);
-		material->UseMaterial(shader);
+		if (texture != nullptr && material != nullptr) {
+			texture->UseTexture(GL_TEXTURE0);
+			material->UseMaterial(shader);
+		}		
 
 		glBindVertexArray(VAO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);

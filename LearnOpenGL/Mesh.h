@@ -10,6 +10,7 @@ namespace opengl {
 	class Mesh
 	{
 	public:
+		Mesh();
 		Mesh(Texture* texture, Material* material);
 		void CreateMesh(GLfloat* vertices, unsigned int verticeCount, unsigned int numOfVertices);
 		void CreateMeshIndex(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices);
