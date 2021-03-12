@@ -6,12 +6,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
-struct Vertex {
-	glm::vec3 pos; // vertex position (x,y,z)
-	glm::vec3 col; // vertex color (r,g,b)
-	glm::vec2 tex; // Texture coords (u, v)
-	glm::vec3 normal; // Normals
-};
+#include "../../API Wrapper/Utilities.h"
 
 namespace opengl {
 	static void calcAverageNormals(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)

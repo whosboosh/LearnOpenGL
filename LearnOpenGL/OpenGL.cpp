@@ -20,23 +20,22 @@ namespace opengl {
 		screenShader.CreateFromFiles("../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.vert", "../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.frag");
 	}
 
-	void OpenGL::draw(glm::mat4 projectionMatrix)
+	void OpenGL::draw()
 	{
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		RenderPass(projectionMatrix, camera->calculateViewMatrix());
+		glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)window->getBufferWidth() / (GLfloat)window->getBufferWidth(), 0.1f, 100.0f);
+		RenderPass(projection, camera->calculateViewMatrix());
 	}
 
 	void OpenGL::RenderScene(Shader* shader)
 	{
 		for (int i = 0; i < meshList.size(); i++)
 		{
-			glm::mat4 model(1.0f); // Identity matrix
-			model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
-			shader->setMat4("model", model);
-			shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
+			shader->setMat4("model", meshList[i]->getModel());
+			shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(meshList[i]->getModel())));
 			meshList[i]->RenderMeshIndex(shader);
 			//glm::vec3 cameraPos = camera->getCameraPosition();
 			//std::cout << "Camera : " << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << "\n";
@@ -67,11 +66,24 @@ namespace opengl {
 		RenderScene(&geometryShader);
 	}
 
-	void OpenGL::addMesh(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices)
+	void OpenGL::rebindObjects()
+	{
+		for (int i = 0; i < meshList.size(); i++)
+		{
+			meshList[i]->CreateMeshIndex();
+		}
+		for (int i = 0; i < modelList.size(); i++)
+		{
+			// TODO: Add rebind methods for model
+			// CreateMeshIndex
+		}
+	}
+
+	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 	{
 		// Create a mesh
-		opengl::Mesh* mesh = new opengl::Mesh();
-		mesh->CreateMeshIndex(vertices, indices);
+		opengl::Mesh* mesh = new opengl::Mesh(vertices, indices);
+		mesh->CreateMeshIndex();
 		meshList.push_back(mesh);
 	}
 
@@ -83,6 +95,18 @@ namespace opengl {
 	void OpenGL::setMeshList(std::vector<Mesh*> meshList)
 	{
 		this->meshList = meshList;
+	}
+
+	void OpenGL::updateModelMatrix(int modelId, glm::mat4 newModel)
+	{
+		if (modelId >= modelList.size()) return;
+		modelList[modelId]->setModel(newModel);
+	}
+
+	void OpenGL::updateMeshMatrix(int modelId, glm::mat4 newModel)
+	{
+		if (modelId >= meshList.size()) return;
+		meshList[modelId]->setModel(newModel);
 	}
 
 

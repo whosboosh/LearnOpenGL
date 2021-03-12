@@ -16,6 +16,9 @@ namespace opengl {
 		Model(const std::string& fileName);
 		Model(const std::string& fileName, Texture* customTexture);
 
+		void setModel(glm::mat4 model) { this->model = model; }
+		glm::mat4 getModel() { return model; }
+
 		void LoadModel();
 		void RenderModel(Shader* shader);
 		void ClearModel();
@@ -26,6 +29,8 @@ namespace opengl {
 		std::vector<Mesh*> meshList;
 		std::vector<Texture*> textureList;
 		std::vector<unsigned int> meshToTex;
+		
+		glm::mat4 model;
 
 		std::string fileName;
 		Texture* customTexture;

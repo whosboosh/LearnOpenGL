@@ -21,15 +21,19 @@ namespace opengl {
 		OpenGL();
 
 		void init(Window* window, Camera* camera);
-		void draw(glm::mat4 projectionMatrix);
+		void draw();
 
 		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
 		void RenderScene(Shader* shader);
 
-		void addMesh(std::vector<Vertex>* vertices, std::vector<uint32_t>* indices);
+		void addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+		void rebindObjects();
 
 		void setModelList(std::vector<Model*> modelList);
 		void setMeshList(std::vector<Mesh*> meshList);
+
+		void updateModelMatrix(int modelId, glm::mat4 newModel);
+		void updateMeshMatrix(int modelId, glm::mat4 newModel);
 
 		~OpenGL();
 
