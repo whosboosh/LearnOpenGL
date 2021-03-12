@@ -45,6 +45,7 @@ MultiSampler multiSampler;
 
 Texture marbleTexture;
 Texture plainTexture;
+Texture brickRed;
 Texture brickDiffuse;
 Texture brickNormal;
 Texture brickDisplacement;
@@ -133,10 +134,10 @@ void CreateObjects() {
 	};
 
 	std::vector<Vertex> floorVertices = {
-	{ { -40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
-	{ { 40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
-	{ { -40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
-	{ { 40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
+	{ { -40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 1.0f },{ 0.0f, 1.0f, 0.0f} }, //BL
+	{ { 40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//BR
+	{ { -40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//FL
+	{ { 40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }//FR
 	};
 
 	std::vector<uint32_t> floorIndices = {
@@ -152,11 +153,11 @@ void CreateObjects() {
 	obj1->CreateMeshIndex(&vertices, &indices);
 	meshList.push_back(obj1);
 
-	Mesh* obj2 = new Mesh(&brickDiffuse, &dullMaterial);
+	Mesh* obj2 = new Mesh(&brickRed, &dullMaterial);
 	obj2->CreateMeshIndex(&vertices2, &indices2);
 	meshList.push_back(obj2);
 
-	Mesh* obj3 = new Mesh();
+	Mesh* obj3 = new Mesh(&marbleTexture, &shinyMaterial);
 	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
 	meshList.push_back(obj3);
 
@@ -222,7 +223,6 @@ void RenderScene(Shader* shader)
 	brickNormal.UseTexture(GL_TEXTURE2);
 
 	// CUBE
-	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 1);
 	glm::mat4 model(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f)); // Apply a translation matrix to the model matrix
@@ -234,7 +234,6 @@ void RenderScene(Shader* shader)
 	meshList[0]->RenderMeshIndex(shader); // Render object
 
 	// SUN
-	shader->setBool("shouldUseTexture", 0);
 	shader->setBool("shouldUseNormalMap", 0);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(xOffset, yOffset, zOffset));
@@ -244,7 +243,6 @@ void RenderScene(Shader* shader)
 	meshList[1]->RenderMeshIndex(shader);
 
 	// FLOOR
-	shader->setBool("shouldUseTexture", 1);
 	shader->setBool("shouldUseNormalMap", 0);
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
@@ -252,6 +250,7 @@ void RenderScene(Shader* shader)
 	shader->setMat4("inverseTransposeModel", glm::transpose(glm::inverse(model)));
 	meshList[2]->RenderMeshIndex(shader);
 
+	
 	// MODEL
 	model = glm::mat4(1.0f); // Identity matrix
 	model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
@@ -325,6 +324,8 @@ int main()
 
 	brickDiffuse = Texture("Textures/brickwall.jpg");
 	brickDiffuse.LoadTexture();
+	brickRed = Texture("Textures/brick.png");
+	brickRed.LoadTexture();
 	brickNormal = Texture("Textures/brickwall_normal.jpg");
 	brickNormal.LoadTexture();
 	brickDisplacement = Texture("Textures/bricks2_disp.jpg");

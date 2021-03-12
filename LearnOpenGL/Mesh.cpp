@@ -62,8 +62,8 @@ void Mesh::CreateMesh(GLfloat* vertices, unsigned int floatCount, unsigned int n
 
 void Mesh::RenderMeshIndex(Shader* shader)
 {
-	if (texture != nullptr && material != nullptr) {
-		shader->setBool("shouldUseTexture", 1);
+	shader->setBool("shouldUseTexture", 1);
+	if (texture && material ) {
 		texture->UseTexture(GL_TEXTURE0);
 		material->UseMaterial(shader);
 	}
