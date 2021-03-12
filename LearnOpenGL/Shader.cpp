@@ -1,5 +1,8 @@
 #include "Shader.h"
 
+#include <iostream>
+#include <filesystem>
+
 namespace opengl {
 	Shader::Shader()
 	{
@@ -108,6 +111,8 @@ namespace opengl {
 			snprintf(locBuff, sizeof(locBuff), "pointLights[%d].exponent", i);
 			uniformPointLight[i].uniformExponent = glGetUniformLocation(shaderID, locBuff);
 		}
+
+		std::cout << "Shaders created\n";
 	}
 
 	void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)

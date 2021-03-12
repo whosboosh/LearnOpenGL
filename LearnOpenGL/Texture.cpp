@@ -11,6 +11,7 @@ namespace opengl {
 		fileLocation = NULL;
 	}
 
+
 	Texture::Texture(const char* fileLoc)
 	{
 		textureID = 0;
@@ -28,6 +29,7 @@ namespace opengl {
 			printf("Failed to find: %s\n", fileLocation);
 			return false;
 		}
+
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 

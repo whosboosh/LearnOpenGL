@@ -9,6 +9,9 @@ namespace opengl {
 
 	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Texture* texture, Material* material)
 	{
+		this->vertices = vertices;
+		this->indices = indices;
+
 		this->texture = texture;
 		this->material = material;
 	}

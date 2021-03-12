@@ -5,6 +5,9 @@
 #include "stb_image.h"
 #endif
 
+#include <string>
+#include <iostream>
+
 namespace opengl {
 	class Texture
 	{

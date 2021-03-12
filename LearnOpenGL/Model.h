@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Shader.h"
-#include <vector>
 #include "Mesh.h"
+
+#include <vector>
+#include <string>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>

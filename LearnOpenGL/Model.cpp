@@ -36,9 +36,11 @@ namespace opengl {
 		for (size_t i = 0; i < meshList.size(); i++) {
 			unsigned int materialIndex = meshToTex[i];
 
+			// TODO: Enable custom texture support
+			// Mesh RenderIndex overrides GL_TEXTURE0
 			//if (materialIndex < textureList.size() && textureList[materialIndex]) {
 				//textureList[materialIndex]->UseTexture(GL_TEXTURE0);
-			//}
+			//
 
 			meshList[i]->RenderMeshIndex(shader);
 		}
@@ -136,10 +138,9 @@ namespace opengl {
 					int index = std::string(path.data).rfind("\\");
 					std::string fileName = std::string(path.data).substr(index + 1);
 
-					std::string texPath = std::string("Textures/") + fileName;
+					std::string texPath = std::string("textures/") + fileName;
 					textureList[i] = new Texture(texPath.c_str());
-
-
+					textureList[i] = new Texture(texPath.c_str());
 
 					if (!textureList[i]->LoadTexture())
 					{
@@ -152,7 +153,7 @@ namespace opengl {
 			}
 
 			if (!textureList[i] && !customTexture) {
-				textureList[i] = new Texture("Textures/plain.png");
+				textureList[i] = new Texture("textures/plain.png");
 				textureList[i]->LoadTextureA();
 			}
 			else {

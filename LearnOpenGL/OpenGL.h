@@ -13,6 +13,7 @@
 #include "Mesh.h"
 
 #include <iostream>
+#include <string>
 
 namespace opengl {
 	class OpenGL
@@ -27,6 +28,11 @@ namespace opengl {
 		void RenderScene(Shader* shader);
 
 		void addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+		void addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName);
+
+		void addModel(const char* fileName, const char* textureName);
+		void addModel(const char* fileName);
+
 		void rebindObjects();
 
 		void setModelList(std::vector<Model*> modelList);

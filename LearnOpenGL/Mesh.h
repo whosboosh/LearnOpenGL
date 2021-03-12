@@ -32,7 +32,7 @@ namespace opengl {
 
 		glm::mat4 model;
 
-		Texture* texture;
-		Material* material;
+		Texture* texture = nullptr;
+		Material* material = nullptr;
 	};
 }
