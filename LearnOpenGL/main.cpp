@@ -133,10 +133,10 @@ void CreateObjects() {
 	};
 
 	std::vector<Vertex> floorVertices = {
-		{ { -40, 0, -40}, { 0.0f, 0.0f, 0.0f}, { 1.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }, //BL
-		{ { 40, 0, -40}, { 10.0f, 0.0f, 0.0f}, { 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//BR
-		{ { -40, 0, 40 }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f} },//FL
-		{ { 40, 0, 40 }, { 10.0f, 10.0f, 0.0f }, { 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f} }//FR
+	{ { -40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }, //BL
+	{ { 40, 0, -40}, { 1.0, 1.0, 1.0}, { 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//BR
+	{ { -40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f} },//FL
+	{ { 40, 0, 40 }, { 1.0, 1.0, 1.0 }, { 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f} }//FR
 	};
 
 	std::vector<uint32_t> floorIndices = {
@@ -156,7 +156,7 @@ void CreateObjects() {
 	obj2->CreateMeshIndex(&vertices2, &indices2);
 	meshList.push_back(obj2);
 
-	Mesh* obj3 = new Mesh(&marbleTexture, &shinyMaterial);
+	Mesh* obj3 = new Mesh();
 	obj3->CreateMeshIndex(&floorVertices, &floorIndices);
 	meshList.push_back(obj3);
 
