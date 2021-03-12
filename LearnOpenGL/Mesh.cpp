@@ -1,5 +1,9 @@
 #include "Mesh.h"
 
+Mesh::Mesh()
+{
+}
+
 Mesh::Mesh(Texture* texture, Material* material)
 {
 	this->texture = texture;
@@ -58,8 +62,10 @@ void Mesh::CreateMesh(GLfloat* vertices, unsigned int floatCount, unsigned int n
 
 void Mesh::RenderMeshIndex(Shader* shader)
 {
-	texture->UseTexture(GL_TEXTURE0);
-	material->UseMaterial(shader);
+	if (texture != nullptr && material != nullptr) {
+		texture->UseTexture(GL_TEXTURE0);
+		material->UseMaterial(shader);
+	}
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
