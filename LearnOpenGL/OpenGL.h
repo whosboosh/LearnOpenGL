@@ -10,6 +10,7 @@
 #include "Utilities.h"
 #include "MultiSampler.h"
 #include "Model.h"
+#include "Mesh.h"
 
 #include <iostream>
 
