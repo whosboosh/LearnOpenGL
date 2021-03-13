@@ -16,7 +16,8 @@ namespace opengl {
         void UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation,
             GLuint diffuseIntensityLocation, GLuint directionLocation);
 
-        void UpdatePosition(GLfloat xDir, GLfloat yDir, GLfloat zDir);
+        void updateLight(glm::vec3* position, glm::vec3* colour, float* ambientIntensity, float* diffuseIntensity);
+
 
         glm::mat4 CalculateLightTransform();
 

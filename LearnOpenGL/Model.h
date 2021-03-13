@@ -36,7 +36,6 @@ namespace opengl {
 
 		std::string fileName;
 		Texture* customTexture;
-
 		Material* standardMaterial = new Material(0.6f, 64);
 
 		void LoadNode(aiNode* node, const aiScene* scene);

@@ -54,20 +54,6 @@ namespace opengl {
 				meshList[i] = nullptr;
 			}
 		}
-		/*
-		if (customTexture) {
-			delete customTexture;
-		}
-		delete standardMaterial;
-
-		for (size_t i = 0; i < textureList.size(); i++) {
-			if (textureList[i]) {
-				delete textureList[i];
-				textureList[i] = nullptr;
-			}
-		}
-		*/
-
 	}
 
 	void Model::LoadNode(aiNode* node, const aiScene* scene)
@@ -166,5 +152,16 @@ namespace opengl {
 	Model::~Model()
 	{
 		ClearModel();
+		//delete standardMaterial;
+		if (!customTexture) {
+			//delete customTexture;
+		}
+
+		for (size_t i = 0; i < textureList.size(); i++) {
+			if (textureList[i]) {
+				//delete textureList[i];
+				textureList[i] = nullptr;
+			}
+		}
 	}
 }

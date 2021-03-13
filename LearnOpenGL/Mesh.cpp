@@ -51,7 +51,7 @@ namespace opengl {
 	void Mesh::RenderMeshIndex(Shader* shader)
 	{
 		shader->setBool("shouldUseTexture", 1);
-		if (texture != nullptr && material != nullptr) {
+		if (texture && material) {
 			texture->UseTexture(GL_TEXTURE0);
 			material->UseMaterial(shader);
 		}
@@ -97,5 +97,8 @@ namespace opengl {
 	Mesh::~Mesh()
 	{
 		ClearMesh();
+
+		delete material;
+		delete texture;
 	}
 }

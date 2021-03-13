@@ -115,7 +115,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)/Dependencies/GLFW/include;$(SolutionDir)/Dependencies/GLM;$(SolutionDir)/Dependencies/GLAD/include;$(SolutionDir)/Dependencies/ASSIMP/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Dependencies/GLFW/include;$(SolutionDir)/Dependencies/GLM;$(SolutionDir)/Dependencies/GLAD/include;$(SolutionDir)/Dependencies/ASSIMP/include;$(SolutionDir)/Dependencies/imgui;C:/VulkanSDK/1.2.148.1/Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

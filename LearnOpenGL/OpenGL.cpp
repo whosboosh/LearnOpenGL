@@ -18,16 +18,18 @@ namespace opengl {
 		geometryShader.CreateFromFiles("../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.vert", "../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.frag");
 		//directionalShadowShader.CreateFromFiles("../../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.vert", "../../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.frag");
 		//screenShader.CreateFromFiles("../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.vert", "../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.frag");
+
+		directionalLight = new DirectionalLight();
 	}
 
-	void OpenGL::draw()
+	void OpenGL::draw(glm::mat4 projection, glm::mat4 viewMatrix)
 	{
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		glm::mat4 projection = glm::perspective(glm::radians(70.0f), (GLfloat)window->getBufferWidth() / (GLfloat)window->getBufferWidth(), 0.1f, 100.0f);
-		RenderPass(projection, camera->calculateViewMatrix());
+		RenderPass(projection, viewMatrix);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
 	void OpenGL::RenderScene(Shader* shader)
@@ -63,7 +65,7 @@ namespace opengl {
 		//geometryShader.setInt("directionalShadowMap", 1);
 		//geometryShader.setInt("normalMap", 2);
 
-		//geometryShader.SetDirectionalLight(&mainLight);
+		geometryShader.SetDirectionalLight(directionalLight);
 		//geometryShader.SetPointLights(pointLights, pointLightCount);
 
 		//glm::mat4 lightTransform = mainLight.CalculateLightTransform();
@@ -88,7 +90,7 @@ namespace opengl {
 	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 	{
 		// Create a mesh
-		opengl::Mesh* mesh = new opengl::Mesh(vertices, indices);
+		Mesh* mesh = new Mesh(vertices, indices);
 		mesh->CreateMeshIndex();
 		meshList.push_back(mesh);
 	}
@@ -96,13 +98,12 @@ namespace opengl {
 
 	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName)
 	{
-		Texture texture = Texture(textureName);
-		texture.LoadTexture();
-		texture.UseTexture(GL_TEXTURE0);
+		Texture *texture = new Texture(textureName);
+		texture->LoadTexture();
 
-		Material standardMaterial = Material(0.8f, 64);
+		Material *standardMaterial = new Material(0.8f, 64);
 
-		opengl::Mesh *mesh = new opengl::Mesh(vertices, indices, &texture, &standardMaterial);
+		Mesh* mesh = new Mesh(vertices, indices, texture, standardMaterial);
 		mesh->CreateMeshIndex();
 		meshList.push_back(mesh);
 	}
@@ -120,6 +121,16 @@ namespace opengl {
 		Model* model = new Model(fileName);
 		model->LoadModel();
 		modelList.push_back(model);
+	}
+
+	void OpenGL::createDirectionalLight(glm::vec3 position, glm::vec3 colour, float ambientIntensity, float diffuseIntensity)
+	{
+		directionalLight = new DirectionalLight(8192, 8192, colour.x, colour.y, colour.z, ambientIntensity, diffuseIntensity, position.x, position.y, position.z);
+	}
+
+	void OpenGL::updateDirectionalLight(glm::vec3* position, glm::vec3* colour, float* ambientIntensity, float* diffuseIntensity)
+	{
+		directionalLight->updateLight(position, colour, ambientIntensity, diffuseIntensity);
 	}
 
 	void OpenGL::setModelList(std::vector<Model*> modelList)
@@ -147,7 +158,15 @@ namespace opengl {
 
 	OpenGL::~OpenGL()
 	{
-		//delete meshList;
-		//delete modelList;
+		for (int i = 0; i < meshList.size(); i++)
+		{
+			delete meshList[i];
+		}
+		for (int i = 0; i < modelList.size(); i++)
+		{
+			delete modelList[i];
+		}
+
+		delete directionalLight;
 	}
 }

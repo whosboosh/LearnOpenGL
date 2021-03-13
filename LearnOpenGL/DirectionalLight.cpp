@@ -19,16 +19,20 @@ namespace opengl {
 	void DirectionalLight::UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation,
 		GLuint diffuseIntensityLocation, GLuint directionLocation)
 	{
-		glUniform3f(ambientColourLocation, colour.x, colour.y, colour.z);
-		glUniform1f(ambientIntensityLocation, ambientIntensity);
+		glUniform3fv(ambientColourLocation, 1, &colour[0]);
+		glUniform3fv(directionLocation, 1, &direction[0]);
 
-		glUniform3f(directionLocation, direction.x, direction.y, direction.z);
+		glUniform1f(ambientIntensityLocation, ambientIntensity);
 		glUniform1f(diffuseIntensityLocation, diffuseIntensity);
 	}
 
-	void DirectionalLight::UpdatePosition(GLfloat xDir, GLfloat yDir, GLfloat zDir)
+	void DirectionalLight::updateLight(glm::vec3* position, glm::vec3* colour, float* ambientIntensity, float* diffuseIntensity)
 	{
-		direction = glm::vec3(xDir, yDir, zDir);
+		this->direction = *position;
+		this->colour = *colour;
+		this->ambientIntensity = *ambientIntensity;
+		this->diffuseIntensity = *diffuseIntensity;
+
 	}
 
 	glm::mat4 DirectionalLight::CalculateLightTransform()

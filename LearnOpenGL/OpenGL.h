@@ -22,7 +22,7 @@ namespace opengl {
 		OpenGL();
 
 		void init(Window* window, Camera* camera);
-		void draw();
+		void draw(glm::mat4 projection, glm::mat4 viewMatrix);
 
 		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
 		void RenderScene(Shader* shader);
@@ -32,6 +32,9 @@ namespace opengl {
 
 		void addModel(const char* fileName, const char* textureName);
 		void addModel(const char* fileName);
+
+		void createDirectionalLight(glm::vec3 position, glm::vec3 colour, float ambientIntensity, float diffuseIntensity);
+		void updateDirectionalLight(glm::vec3* position, glm::vec3* colour, float* ambientIntensity, float* diffuseIntensity);
 
 		void rebindObjects();
 
@@ -54,6 +57,8 @@ namespace opengl {
 		Shader directionalShadowShader;
 		Shader screenShader;
 		MultiSampler multiSampler;
+
+		DirectionalLight *directionalLight;
 	};
 
 }
