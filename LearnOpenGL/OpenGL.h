@@ -24,6 +24,7 @@ namespace opengl {
 		void init(Window* window, Camera* camera);
 		void draw(glm::mat4 projection, glm::mat4 viewMatrix);
 
+		void DirectionalShadowMapPass(DirectionalLight* light);
 		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
 		void RenderScene(Shader* shader);
 
@@ -49,6 +50,9 @@ namespace opengl {
 	private:
 		Camera* camera;
 		Window* window;
+
+		unsigned int quadVAO = 0;
+		unsigned int quadVBO;
 
 		std::vector<Model*> modelList;
 		std::vector<Mesh*> meshList;

@@ -16,19 +16,59 @@ namespace opengl {
 
 		// Create shaders
 		geometryShader.CreateFromFiles("../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.vert", "../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.frag");
-		//directionalShadowShader.CreateFromFiles("../../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.vert", "../../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.frag");
-		//screenShader.CreateFromFiles("../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.vert", "../../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.frag");
+		directionalShadowShader.CreateFromFiles("../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.vert", "../LearnOpenGL/LearnOpenGL/Shaders/directional_shadow_map.frag");
+		screenShader.CreateFromFiles("../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.vert", "../LearnOpenGL/LearnOpenGL/Shaders/anti_aliasing.frag");
 
 		directionalLight = new DirectionalLight();
+
+		float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+		};
+		// setup screen VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	}
 
 	void OpenGL::draw(glm::mat4 projection, glm::mat4 viewMatrix)
 	{
+		multiSampler.BindFrameBuffer();
+
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
+		DirectionalShadowMapPass(directionalLight);
+
+		multiSampler.BindFrameBuffer();
+
 		RenderPass(projection, viewMatrix);
+		
+		multiSampler.BlitFrameBuffer();
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+
+		screenShader.UseShader();
+		glBindVertexArray(quadVAO);
+		multiSampler.Read(GL_TEXTURE0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
@@ -50,6 +90,24 @@ namespace opengl {
 		}
 	}
 
+	void OpenGL::DirectionalShadowMapPass(DirectionalLight* light)
+	{
+		directionalShadowShader.UseShader();
+
+		glViewport(0, 0, light->GetShadowMap()->GetShadowWidth(), light->GetShadowMap()->GetShadowHeight());
+
+		// Calls glBindFrameBuffer(GL_FRAMEBUFFER, FBO) in ShadowMap
+		light->GetShadowMap()->BindFrameBuffer();
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		glm::mat4 lightTransform = light->CalculateLightTransform();
+		directionalShadowShader.setMat4("directionalLightTransform", lightTransform);
+
+		RenderScene(&directionalShadowShader);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
 	void OpenGL::RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix)
 	{
 		geometryShader.UseShader();
@@ -58,33 +116,20 @@ namespace opengl {
 
 		geometryShader.setMat4("projection", projectionMatrix);
 		geometryShader.setMat4("view", viewMatrix);
-		//geometryShader.setVec3("eyePosition", glm::vec3(camera->getCameraPosition().x, camera->getCameraPosition().y, camera->getCameraPosition().z));
+		geometryShader.setVec3("eyePosition", glm::vec3(camera->getCameraPosition().x, camera->getCameraPosition().y, camera->getCameraPosition().z));
 		geometryShader.setInt("theTexture", 0); //GL_TEXTURE0
 
-		//mainLight.GetShadowMap()->Read(GL_TEXTURE1);
-		//geometryShader.setInt("directionalShadowMap", 1);
-		//geometryShader.setInt("normalMap", 2);
+		directionalLight->GetShadowMap()->Read(GL_TEXTURE1);
+		geometryShader.setInt("directionalShadowMap", 1);
+		geometryShader.setInt("normalMap", 2);
 
 		geometryShader.SetDirectionalLight(directionalLight);
 		//geometryShader.SetPointLights(pointLights, pointLightCount);
 
-		//glm::mat4 lightTransform = mainLight.CalculateLightTransform();
-		//geometryShader.setMat4("directionalLightTransform", lightTransform);
+		glm::mat4 lightTransform = directionalLight->CalculateLightTransform();
+		geometryShader.setMat4("directionalLightTransform", lightTransform);
 
 		RenderScene(&geometryShader);
-	}
-
-	void OpenGL::rebindObjects()
-	{
-		for (int i = 0; i < meshList.size(); i++)
-		{
-			meshList[i]->CreateMeshIndex();
-		}
-		for (int i = 0; i < modelList.size(); i++)
-		{
-			// TODO: Add rebind methods for model
-			// CreateMeshIndex
-		}
 	}
 
 	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)

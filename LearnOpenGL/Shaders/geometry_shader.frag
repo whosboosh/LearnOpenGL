@@ -65,7 +65,7 @@ float CalcDirectionalShadowFactor()
 	vec3 normal = normalize(Normal);
 	vec3 lightDir = normalize(directionalLight.direction - FragPos);
 	
-	float bias = max(0.05 * (1.0 - dot(normal, -lightDir)), 0.0005);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.0005);
 	
 	float shadow = 0.0;
 	
@@ -104,22 +104,21 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 	float diffuseFactor = max(dot(normal, lightDir), 0.0f);
 	vec4 diffuseColour = vec4(light.colour * light.diffuseIntensity * diffuseFactor, 1.0f);
 	
-	vec4 specularColour = vec4(0.0, 0.0, 0.0, 0.0);
+	vec4 specularColour = vec4(0, 0, 0, 0);
 	if(diffuseFactor > 0.0f)
 	{
-		vec3 fragToEye = normalize(eyePosition - FragPos);
+		vec3 fragToEye = normalize(eyePosition- FragPos);
 		vec3 reflectedVertex = normalize(reflect(-lightDir, normal));
 		
 		float specularFactor = dot(fragToEye, reflectedVertex);
 		if(specularFactor > 0.0f)
 		{
 			specularFactor = pow(specularFactor, 128);
-			specularColour = vec4(light.colour * 0.5 * specularFactor, 1.0);
+			specularColour = vec4(light.colour * 0.5 * specularFactor, 1.0f);
 		}
 	}
 	
-	//return (ambientColour + (1.0 - shadowFactor) * (diffuseColour + specularColour));
-	return (ambientColour + (diffuseColour + specularColour));
+	return (ambientColour + (1.0 - shadowFactor) * (diffuseColour + specularColour));
 }
 
 vec4 CalcDirectionalLight()
@@ -153,7 +152,7 @@ void main()
 	if (shouldUseTexture)
 	{
 		vec4 finalColour = CalcDirectionalLight();
-		finalColour += CalcPointLights();
+		//finalColour += CalcPointLights();
 		
 		colour = texture(theTexture, TexCoord) * finalColour;
 	}
