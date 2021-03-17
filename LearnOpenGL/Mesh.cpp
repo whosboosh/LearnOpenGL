@@ -5,6 +5,7 @@ namespace opengl {
 	{
 		this->vertices = vertices;
 		this->indices = indices;
+		this->shouldUseTexture = false;
 	}
 
 	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Texture* texture, Material* material)
@@ -14,6 +15,7 @@ namespace opengl {
 
 		this->texture = texture;
 		this->material = material;
+		this->shouldUseTexture = true;
 	}
 
 	void Mesh::CreateMeshIndex()
@@ -51,7 +53,7 @@ namespace opengl {
 	void Mesh::RenderMeshIndex(Shader* shader)
 	{
 		shader->setBool("shouldUseTexture", 1);
-		if (texture && material) {
+		if (shouldUseTexture) {
 			texture->UseTexture(GL_TEXTURE0);
 			material->UseMaterial(shader);
 		}

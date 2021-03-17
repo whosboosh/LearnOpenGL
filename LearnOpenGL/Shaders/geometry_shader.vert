@@ -28,6 +28,4 @@ void main()
 	Normal = mat3(inverseTransposeModel) * norm;
 	
 	FragPos = vec3(model * vec4(pos, 1.0)); 
-
-	
 }

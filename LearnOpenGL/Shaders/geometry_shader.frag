@@ -51,6 +51,7 @@ uniform sampler2D normalMap;
 uniform Material material;
 uniform bool shouldUseTexture;
 uniform bool shouldUseNormalMap;
+uniform bool shouldUseShadows;
 
 uniform vec3 eyePosition;
 
@@ -123,7 +124,11 @@ vec4 CalcLightByDirection(Light light, vec3 direction, float shadowFactor)
 
 vec4 CalcDirectionalLight()
 {
-	float shadowFactor = CalcDirectionalShadowFactor();
+	float shadowFactor = 0.0f;
+	if (shouldUseShadows)
+	{
+		shadowFactor = CalcDirectionalShadowFactor();
+	}
 	return CalcLightByDirection(directionalLight.base, directionalLight.direction, shadowFactor);
 }
 
@@ -149,14 +154,13 @@ vec4 CalcPointLights()
 
 void main()
 {
+	vec4 finalColour = CalcDirectionalLight();
+	//finalColour += CalcPointLights();
 	if (shouldUseTexture)
 	{
-		vec4 finalColour = CalcDirectionalLight();
-		//finalColour += CalcPointLights();
-		
 		colour = texture(theTexture, TexCoord) * finalColour;
 	}
 	else {
-		colour = vCol;
+		colour = vCol * finalColour;
 	}
 }

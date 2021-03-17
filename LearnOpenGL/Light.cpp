@@ -3,6 +3,9 @@
 namespace opengl {
 	Light::Light()
 	{
+		shadowMap = new ShadowMap();
+		shadowMap->init(8192, 8192);
+
 		colour = glm::vec3(1.0f, 1.0f, 1.0f);
 		ambientIntensity = 1.0f;
 

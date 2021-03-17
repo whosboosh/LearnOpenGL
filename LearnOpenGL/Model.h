@@ -20,6 +20,7 @@ namespace opengl {
 
 		void setModel(glm::mat4 model) { this->model = model; }
 		glm::mat4 getModel() { return model; }
+		std::vector<Mesh*> getMeshList() { return meshList; }
 
 		void LoadModel();
 		void RenderModel(Shader* shader);

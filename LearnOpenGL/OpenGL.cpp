@@ -12,7 +12,7 @@ namespace opengl {
 
 		// Create multisampler
 		multiSampler = MultiSampler(window->getBufferWidth(), window->getBufferHeight());
-		multiSampler.init();
+		multiSampler.init(multiSampleLevel);
 
 		// Create shaders
 		geometryShader.CreateFromFiles("../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.vert", "../LearnOpenGL/LearnOpenGL/Shaders/geometry_shader.frag");
@@ -47,7 +47,7 @@ namespace opengl {
 	{
 		multiSampler.BindFrameBuffer();
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.6f, 0.65f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
@@ -132,40 +132,56 @@ namespace opengl {
 		RenderScene(&geometryShader);
 	}
 
-	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
+	int OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices)
 	{
 		// Create a mesh
 		Mesh* mesh = new Mesh(vertices, indices);
 		mesh->CreateMeshIndex();
 		meshList.push_back(mesh);
+
+		return meshList.size() - 1;
 	}
 
 
-	void OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName)
+	int OpenGL::addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName)
 	{
 		Texture *texture = new Texture(textureName);
-		texture->LoadTexture();
+		std::string s = textureName;
+		std::string extension = s.substr(s.find_last_of("."));
+		if (extension.find("png") != std::string::npos)
+		{
+			texture->LoadTexture();
+		}
+		else {
+			texture->LoadTexture();
+		}
 
 		Material *standardMaterial = new Material(0.8f, 64);
 
 		Mesh* mesh = new Mesh(vertices, indices, texture, standardMaterial);
 		mesh->CreateMeshIndex();
 		meshList.push_back(mesh);
+
+		return meshList.size() - 1;
 	}
 
-	void OpenGL::addModel(const char* fileName, const char* textureName)
+	int OpenGL::addModel(const char* fileName, const char* textureName)
 	{ 
 		// Create a mesh
 		Model *model = new Model(fileName, new Texture(textureName));
 		model->LoadModel();
 		modelList.push_back(model);
+
+		return modelList.size() - 1;
 	}
 
-	void OpenGL::addModel(const char* fileName)
+	int OpenGL::addModel(const char* fileName)
 	{
 		Model* model = new Model(fileName);
 		model->LoadModel();
 		modelList.push_back(model);
+
+		return modelList.size() - 1;
 	}
 
 	void OpenGL::createDirectionalLight(glm::vec3 position, glm::vec3 colour, float ambientIntensity, float diffuseIntensity)
@@ -178,6 +194,29 @@ namespace opengl {
 		directionalLight->updateLight(position, colour, ambientIntensity, diffuseIntensity);
 	}
 
+	void OpenGL::setShadows(bool state)
+	{
+		std::cout << state;
+		geometryShader.UseShader();
+		geometryShader.setBool("shouldUseShadows", state);
+	}
+
+	void OpenGL::setTextureStateMesh(int meshIndex, bool state)
+	{
+		if (meshIndex > meshList.size() -1) return;
+		meshList[meshIndex]->setShouldUseTexture(state);
+	}
+
+	void OpenGL::setTextureStateModel(int modelIndex, bool state)
+	{
+		if (modelIndex > modelList.size() - 1) return;
+		for (int i = 0; i < modelList[modelIndex]->getMeshList().size(); i++)
+		{
+			modelList[modelIndex]->getMeshList()[i]->setShouldUseTexture(state);
+		}
+
+	}
+
 	void OpenGL::setModelList(std::vector<Model*> modelList)
 	{
 		this->modelList = modelList;
@@ -188,16 +227,16 @@ namespace opengl {
 		this->meshList = meshList;
 	}
 
-	void OpenGL::updateModelMatrix(int modelId, glm::mat4 newModel)
+	void OpenGL::updateModelMatrix(int modelId, glm::mat4 *newModel)
 	{
 		if (modelId >= modelList.size()) return;
-		modelList[modelId]->setModel(newModel);
+		modelList[modelId]->setModel(*newModel);
 	}
 
-	void OpenGL::updateMeshMatrix(int modelId, glm::mat4 newModel)
+	void OpenGL::updateMeshMatrix(int modelId, glm::mat4 *newModel)
 	{
 		if (modelId >= meshList.size()) return;
-		meshList[modelId]->setModel(newModel);
+		meshList[modelId]->setModel(*newModel);
 	}
 
 

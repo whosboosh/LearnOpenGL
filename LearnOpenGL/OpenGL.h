@@ -28,22 +28,30 @@ namespace opengl {
 		void RenderPass(glm::mat4 projectionMatrix, glm::mat4 viewMatrix);
 		void RenderScene(Shader* shader);
 
-		void addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
-		void addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName);
+		int addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+		int addMesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, const char* textureName);
 
-		void addModel(const char* fileName, const char* textureName);
-		void addModel(const char* fileName);
+		int addModel(const char* fileName, const char* textureName);
+		int addModel(const char* fileName);
 
 		void createDirectionalLight(glm::vec3 position, glm::vec3 colour, float ambientIntensity, float diffuseIntensity);
 		void updateDirectionalLight(glm::vec3* position, glm::vec3* colour, float* ambientIntensity, float* diffuseIntensity);
 
-		void rebindObjects();
+		void setShadows(bool state);
+		void setTextureStateMesh(int meshIndex, bool state);
+		void setTextureStateModel(int modelIndex, bool state);
 
 		void setModelList(std::vector<Model*> modelList);
 		void setMeshList(std::vector<Mesh*> meshList);
+		void setMultiSampleLevel(int level) { 
+			if (level % 2 == 0 || level == 1) {
+				this->multiSampleLevel = level;
+			};
+			multiSampler.init(multiSampleLevel);
+		}
 
-		void updateModelMatrix(int modelId, glm::mat4 newModel);
-		void updateMeshMatrix(int modelId, glm::mat4 newModel);
+		void updateModelMatrix(int modelId, glm::mat4 *newModel);
+		void updateMeshMatrix(int modelId, glm::mat4 *newModel);
 
 		~OpenGL();
 
@@ -53,6 +61,8 @@ namespace opengl {
 
 		unsigned int quadVAO = 0;
 		unsigned int quadVBO;
+
+		int multiSampleLevel = 1;
 
 		std::vector<Model*> modelList;
 		std::vector<Mesh*> meshList;
@@ -64,6 +74,7 @@ namespace opengl {
 
 		DirectionalLight *directionalLight;
 	};
+
 
 }
 

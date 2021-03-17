@@ -86,8 +86,12 @@ namespace opengl {
 			}
 			vertices[i].col = { 1.0f, 1.0f, 1.0f };
 			vertices[i].normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+			//vertices[i].normal = { 1,1,1 };
 
-			//std::cout << vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z;
+			//std::cout << vertices[i].pos.x << vertices[i].pos.y << vertices[i].pos.z;
+			//std::cout << vertices[i].col.x << vertices[i].col.y << vertices[i].col.z;
+			//std::cout << vertices[i].tex.x << vertices[i].tex.y;
+			//std::cout << vertices[i].normal.x << vertices[i].normal.y << vertices[i].normal.z;
 		}
 
 		// Go through faces indicies and add to list

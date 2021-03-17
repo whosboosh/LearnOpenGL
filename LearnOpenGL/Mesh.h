@@ -18,6 +18,7 @@ namespace opengl {
 		void RenderMeshIndex(Shader* shader);
 		void ClearMesh();
 
+		void setShouldUseTexture(bool state) { this->shouldUseTexture = state; }
 		void setModel(glm::mat4 model) { this->model = model; }
 		glm::mat4 getModel() { return model; }
 
@@ -26,6 +27,8 @@ namespace opengl {
 		unsigned int VAO, VBO, IBO;
 		unsigned int indiceCount;
 		unsigned int verticeCount;
+
+		bool shouldUseTexture;
 
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;

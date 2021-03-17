@@ -11,7 +11,7 @@ namespace opengl {
 		MultiSampler();
 		MultiSampler(GLuint width, GLuint height);
 
-		virtual void init();
+		virtual void init(int multiSampleLevel);
 		virtual void BlitFrameBuffer();
 		virtual void BindFrameBuffer();
 		virtual void Read(GLenum textureUnit);
