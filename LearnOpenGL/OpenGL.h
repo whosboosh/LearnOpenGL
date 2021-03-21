@@ -49,6 +49,7 @@ namespace opengl {
 			};
 			multiSampler.init(multiSampleLevel);
 		}
+		void setSampleShading(float sampleValue) { setSampleShading(sampleValue); };
 
 		void updateModelMatrix(int modelId, glm::mat4 *newModel);
 		void updateMeshMatrix(int modelId, glm::mat4 *newModel);
@@ -73,6 +74,7 @@ namespace opengl {
 		MultiSampler multiSampler;
 
 		DirectionalLight *directionalLight;
+		unsigned int VBO;
 	};
 
 
